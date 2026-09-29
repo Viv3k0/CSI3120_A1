@@ -67,6 +67,12 @@ bool isComment();
 #define KW_VOID 50
 #define KW_IF 51
 #define KW_ELSE 52
+#define KW_WHILE 53
+#define KW_PRINT 54
+#define KW_RETURN 55
+#define KW_TRUE 56
+#define KW_FALSE 57
+#define KW_SHOW_ENV 58 
 
 /******************/
 /* main driver */
