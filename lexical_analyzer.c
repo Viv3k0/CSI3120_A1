@@ -12,7 +12,7 @@ char nextChar;
 int lexLen;
 int token;
 int nextToken;
-FILE *in_fp; /* Removed *fopen() redundant declaration */
+FILE *in_fp; /* Removed redundant *fopen() declaration */
 char tokenType[100];
 
 /* Function declarations */
@@ -73,43 +73,43 @@ int main() {
 }
 
 /*******************/
-/* lookup - une fonction pour rechercher les opérateurs et les mots-clés et retourner le jeton */
+/* lookup - a function to search for operators and keywords and return the token */
 int lookup(char ch) {
     switch (ch) {
         case '(':
             addChar();
             nextToken = LEFT_PAREN;
-            strcpy(tokenType, "un delimiteur");
+            strcpy(tokenType, "a delimiter");
             break;
         case ')':
             addChar();
             nextToken = RIGHT_PAREN;
-            strcpy(tokenType, "un delimiteur");
+            strcpy(tokenType, "a delimiter");
             break;
         case '{':
             addChar();
             nextToken = LEFT_BRACE;
-            strcpy(tokenType, "un delimiteur");
+            strcpy(tokenType, "a delimiter");
             break;
         case '}':
             addChar();
             nextToken = RIGHT_BRACE;
-            strcpy(tokenType, "un delimiteur");
+            strcpy(tokenType, "a delimiter");
             break;
         case '+':
             addChar();
             nextToken = ADD_OP;
-            strcpy(tokenType, "un operateur arithmetique");
+            strcpy(tokenType, "an arithmetic operator");
             break;
         case '-':
             addChar();
             nextToken = SUB_OP;
-            strcpy(tokenType, "un operateur arithmetique");
+            strcpy(tokenType, "an arithmetic operator");
             break;
         case '*':
             addChar();
             nextToken = MULT_OP;
-            strcpy(tokenType, "un operateur arithmetique");
+            strcpy(tokenType, "an arithmetic operator");
             break;
         case '/':
             addChar();
@@ -122,16 +122,16 @@ int lookup(char ch) {
             if (nextChar == '=') {
                 addChar();
                 nextToken = EQUALS;
-                strcpy(tokenType, "un signe Egalite");
+                strcpy(tokenType, "an equality sign");
             } else {
                 nextToken = ASSIGN_OP;
-                strcpy(tokenType, "un operateur de comparaison");
+                strcpy(tokenType, "a comparison operator");
             }
             break;
         case ';':
             addChar();
             nextToken = SEMICOLON;
-            strcpy(tokenType, "un delimiteur");
+            strcpy(tokenType, "a delimiter");
             break;
         case '<':
             addChar();
@@ -139,10 +139,10 @@ int lookup(char ch) {
             if (nextChar == '=') {
                 addChar();
                 nextToken = LESS_THAN;
-                strcpy(tokenType, "un operateur de comparaison");
+                strcpy(tokenType, "a comparison operator");
             } else {
                 nextToken = LESS_THAN;
-                strcpy(tokenType, "un operateur de comparaison");
+                strcpy(tokenType, "a comparison operator");
             }
             break;
         case '>':
@@ -151,10 +151,10 @@ int lookup(char ch) {
             if (nextChar == '=') {
                 addChar();
                 nextToken = GREATER_THAN;
-                strcpy(tokenType, "un operateur de comparaison");
+                strcpy(tokenType, "a comparison operator");
             } else {
                 nextToken = GREATER_THAN;
-                strcpy(tokenType, "un operateur de comparaison");
+                strcpy(tokenType, "a comparison operator");
             }
             break;
         case '!':
@@ -163,7 +163,7 @@ int lookup(char ch) {
             if (nextChar == '=') {
                 addChar();
                 nextToken = NOT_EQUALS;
-                strcpy(tokenType, "un operateur de comparaison");
+                strcpy(tokenType, "a comparison operator");
             } else {
                 nextToken = UNKNOWN;
                 strcpy(tokenType, "");
@@ -175,7 +175,7 @@ int lookup(char ch) {
             if (nextChar == '&') {
                 addChar();
                 nextToken = AND_OP;
-                strcpy(tokenType, "un operateur booleen");
+                strcpy(tokenType, "a boolean operator");
             } else {
                 nextToken = UNKNOWN;
                 strcpy(tokenType, "");
@@ -187,7 +187,7 @@ int lookup(char ch) {
             if (nextChar == '|') {
                 addChar();
                 nextToken = OR_OP;
-                strcpy(tokenType, "un operateur booleen");
+                strcpy(tokenType, "a boolean operator");
             } else {
                 nextToken = UNKNOWN;
                 strcpy(tokenType, "");
@@ -196,12 +196,12 @@ int lookup(char ch) {
         case '?':
             addChar();
             nextToken = QUESTION_MARK;
-            strcpy(tokenType, "une ponctuation");
+            strcpy(tokenType, "a punctuation mark");
             break;
         case ':':
             addChar();
             nextToken = COLON;
-            strcpy(tokenType, "une ponctuation");
+            strcpy(tokenType, "a punctuation mark");
             break;
         case '\"':
             addChar();
@@ -214,9 +214,9 @@ int lookup(char ch) {
                 addChar();
                 getChar();
                 nextToken = STR_LIT;
-                strcpy(tokenType, "une chaine de caracteres");
+                strcpy(tokenType, "a string literal");
             } else {
-                strncpy(error, "Erreur - chaine de caracteres non fermee", 100);
+                strncpy(error, "Error - unclosed string literal", 100);
                 nextToken = EOF;
                 strcpy(tokenType, "");
             }
@@ -224,7 +224,7 @@ int lookup(char ch) {
         default:
             addChar();
             nextToken = EOF;
-            strcpy(tokenType, "un delimiteur");
+            strcpy(tokenType, "a delimiter");
             break;
     }
     return nextToken;
@@ -232,17 +232,19 @@ int lookup(char ch) {
 
 bool isComment() {
     if (nextChar == '/') {
+        /* Beginning of a single-line comment */
         while (nextChar != '\n' && nextChar != EOF)
-            getChar();
+            getChar(); /* Ignore comment contents */
         nextToken = COMMENT;
         strncpy(lexeme, "a single line comment", 100);
-        strcpy(tokenType, "un commentaire");
+        strcpy(tokenType, "a comment");
     } else if (nextChar == '*') {
+        /* Beginning of a block comment */
         addChar();
         getChar();
         while (true) {
             if (nextChar == EOF) {
-                strncpy(error, "Erreur - block de commentaire non ferme", 100);
+                strncpy(error, "Error - unclosed block comment", 100);
                 nextToken = EOF;
                 strcpy(tokenType, "");
                 return true;
@@ -258,8 +260,8 @@ bool isComment() {
             }
         }
         nextToken = COMMENT;
-        strncpy(lexeme, "un block de commentaire", 100);
-        strcpy(tokenType, "un commentaire");
+        strncpy(lexeme, "a block comment", 100);
+        strcpy(tokenType, "a comment");
     } else {
         return false;
     }
@@ -267,7 +269,7 @@ bool isComment() {
 }
 
 /*******************/
-/* addChar - Une fonction qui ajoute nextChar a lexeme */
+/* addChar - A function to append nextChar to lexeme */
 void addChar() {
     if (lexLen <= 98) {
         lexeme[lexLen++] = nextChar;
@@ -278,7 +280,7 @@ void addChar() {
 }
 
 /*******************/
-/* getChar */
+/* getChar - A function to get the next character from input and determine its character class */
 void getChar() {
     if ((nextChar = getc(in_fp)) != EOF) {
         if (isalpha(nextChar))
@@ -295,19 +297,20 @@ void getChar() {
 }
 
 /*******************/
-/* getNonBlank */
+/* getNonBlank - A function to call getChar until it returns a non-whitespace character */
 void getNonBlank() {
     while (isspace(nextChar))
         getChar();
 }
 
 /*******************/
-/* lex */
+/* lex - A simple lexical analyzer for arithmetic expressions */
 int lex() {
     lexLen = 0;
     error[0] = '\0'; /* Clear previous errors */
     getNonBlank();
     switch (charClass) {
+        /* Parse identifiers or keywords */
         case LETTER:
         case UNDERSCORE:
             addChar();
@@ -317,7 +320,7 @@ int lex() {
                 getChar();
             }
             
-            strcpy(tokenType, "le mot-cle ");
+            strcpy(tokenType, "the keyword ");
             strcat(tokenType, lexeme);
             if (strcmp(lexeme, "if") == 0) {
                 nextToken = IF;
@@ -329,12 +332,12 @@ int lex() {
                 nextToken = WHILE;
             } else if (charClass == UNKNOWN && !isspace(nextChar) && !strchr("(+-*/<>)", nextChar)) {
                 addChar();
-                strncpy(error, "Erreur - identifiant illegal", 100);
+                strncpy(error, "Error - illegal identifier", 100);
                 nextToken = EOF;
                 strcpy(tokenType, "");
             } else {
                 nextToken = IDENT;
-                strcpy(tokenType, "un identifiant");
+                strcpy(tokenType, "an identifier");
             }
             break;
         case DIGIT:
@@ -345,25 +348,25 @@ int lex() {
                 getChar();
             }
             if (nextChar == '.') {
-                addChar();
+                addChar(); /* Include decimal point */
                 getChar();
                 while (charClass == DIGIT) {
                     addChar();
                     getChar();
                 }
                 nextToken = FLOAT_LIT;
-                strcpy(tokenType, "un decimal");
+                strcpy(tokenType, "a float");
             } else if (charClass == LETTER || nextChar == '_') {
                 while (charClass == LETTER || charClass == DIGIT || nextChar == '_') {
                     addChar();
                     getChar();
                 }
-                strncpy(error, "Erreur - identifiant illegal", 100);
+                strncpy(error, "Error - illegal identifier", 100);
                 nextToken = EOF;
                 strcpy(tokenType, "");
             } else {
                 nextToken = INT_LIT;
-                strcpy(tokenType, "un entier");
+                strcpy(tokenType, "an integer");
             }
             break;
         case UNKNOWN:
@@ -376,10 +379,10 @@ int lex() {
             lexeme[1] = 'O';
             lexeme[2] = 'F';
             lexeme[3] = '\0';
-            strcpy(tokenType, "fin du fichier");
+            strcpy(tokenType, "end of file");
             break;
     }
-    printf("Le token suivant est: %d %s, le lexeme suivant est %s", nextToken, tokenType, lexeme);
+    printf("Next token is: %d %s, next lexeme is %s", nextToken, tokenType, lexeme);
     printf("\t%s\n", error);
     return nextToken;
 }
