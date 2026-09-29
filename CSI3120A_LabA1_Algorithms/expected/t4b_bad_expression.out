@@ -1,0 +1,6 @@
+=== MiniScope: tests/t4b_bad_expression.ms ===
+[decl] line 3: var y : int in scope 'global' (level 0) [static]
+[bind] line 4: 'y' -> var y : int, declared at line 3 in scope 'global' (level 0)
+[bind] line 4: 'y' -> var y : int, declared at line 3 in scope 'global' (level 0)
+Syntax error (line 4): expected an expression but found ';'
+--- parsing stopped at the first syntax error ---

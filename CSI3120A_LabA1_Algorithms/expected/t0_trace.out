@@ -1,0 +1,59 @@
+=== MiniScope: tests/t0_trace.ms ===
+Enter <program>
+  Enter <block>
+    Enter <item>
+      Enter <var_decl>
+        Enter <type>
+        Exit <type>
+        Enter <expr>
+          Enter <and_expr>
+            Enter <rel_expr>
+              Enter <add_expr>
+                Enter <term>
+                  Enter <factor>
+                    Enter <primary>
+                    Exit <primary>
+                  Exit <factor>
+                Exit <term>
+              Exit <add_expr>
+            Exit <rel_expr>
+          Exit <and_expr>
+        Exit <expr>
+[decl] line 3: var a : int in scope 'global' (level 0) [static]
+      Exit <var_decl>
+    Exit <item>
+    Enter <item>
+      Enter <stmt>
+        Enter <ident_stmt>
+[bind] line 4: 'a' -> var a : int, declared at line 3 in scope 'global' (level 0)
+          Enter <expr>
+            Enter <and_expr>
+              Enter <rel_expr>
+                Enter <add_expr>
+                  Enter <term>
+                    Enter <factor>
+                      Enter <primary>
+[bind] line 4: 'a' -> var a : int, declared at line 3 in scope 'global' (level 0)
+                      Exit <primary>
+                    Exit <factor>
+                  Exit <term>
+                  Enter <term>
+                    Enter <factor>
+                      Enter <primary>
+                      Exit <primary>
+                    Exit <factor>
+                    Enter <factor>
+                      Enter <primary>
+                      Exit <primary>
+                    Exit <factor>
+                  Exit <term>
+                Exit <add_expr>
+              Exit <rel_expr>
+            Exit <and_expr>
+          Exit <expr>
+        Exit <ident_stmt>
+      Exit <stmt>
+    Exit <item>
+  Exit <block>
+Exit <program>
+--- parse successful; 0 semantic error(s), 0 warning(s) ---

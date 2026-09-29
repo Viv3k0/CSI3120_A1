@@ -1,0 +1,3 @@
+=== MiniScope: tests/t4d_bad_declaration.ms ===
+Syntax error (line 3): expected ':' but found '='
+--- parsing stopped at the first syntax error ---

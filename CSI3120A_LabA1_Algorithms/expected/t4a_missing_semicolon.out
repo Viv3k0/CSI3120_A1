@@ -1,0 +1,6 @@
+=== MiniScope: tests/t4a_missing_semicolon.ms ===
+[decl] line 3: var x : int in scope 'global' (level 0) [static]
+[bind] line 4: 'x' -> var x : int, declared at line 3 in scope 'global' (level 0)
+[bind] line 4: 'x' -> var x : int, declared at line 3 in scope 'global' (level 0)
+Syntax error (line 5): expected ';' but found 'print'
+--- parsing stopped at the first syntax error ---
