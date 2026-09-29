@@ -12,7 +12,7 @@ char nextChar;
 int lexLen;
 int token;
 int nextToken;
-FILE *in_fp, *fopen();
+FILE *in_fp; /* Removed *fopen() redundant declaration */
 char tokenType[100];
 
 /* Function declarations */
@@ -67,6 +67,7 @@ int main() {
         do {
             lex();
         } while (nextToken != EOF);
+        fclose(in_fp);
     }
     return 0;
 }
@@ -210,7 +211,7 @@ int lookup(char ch) {
                 getChar();
             }
             if (nextChar == '\"') {
-                addChar(); // Include the closing double quote
+                addChar();
                 getChar();
                 nextToken = STR_LIT;
                 strcpy(tokenType, "une chaine de caracteres");
@@ -231,26 +232,31 @@ int lookup(char ch) {
 
 bool isComment() {
     if (nextChar == '/') {
-        // Le commencement d'une ligne de commentaire
         while (nextChar != '\n' && nextChar != EOF)
-            getChar(); // Ignorer le contenu du commentaire
+            getChar();
         nextToken = COMMENT;
         strncpy(lexeme, "a single line comment", 100);
         strcpy(tokenType, "un commentaire");
     } else if (nextChar == '*') {
-        // Le commencement d'un block de commentaire
         addChar();
         getChar();
-        while (!(nextChar == '*' && getc(in_fp) == '/')) {
+        while (true) {
             if (nextChar == EOF) {
                 strncpy(error, "Erreur - block de commentaire non ferme", 100);
                 nextToken = EOF;
                 strcpy(tokenType, "");
-                break;
+                return true;
             }
-            getChar();
+            if (nextChar == '*') {
+                getChar();
+                if (nextChar == '/') {
+                    getChar();
+                    break;
+                }
+            } else {
+                getChar();
+            }
         }
-        getChar(); // eliminer le '/'
         nextToken = COMMENT;
         strncpy(lexeme, "un block de commentaire", 100);
         strcpy(tokenType, "un commentaire");
@@ -265,14 +271,14 @@ bool isComment() {
 void addChar() {
     if (lexLen <= 98) {
         lexeme[lexLen++] = nextChar;
-        lexeme[lexLen] = '\0'; // Null-terminate the lexeme string
+        lexeme[lexLen] = '\0';
     } else {
         printf("Error - lexeme is too long\n");
     }
 }
 
 /*******************/
-/* getChar - une fonction pour obtenir le prochain caractère de l'entrée et déterminer sa classe de caractère */
+/* getChar */
 void getChar() {
     if ((nextChar = getc(in_fp)) != EOF) {
         if (isalpha(nextChar))
@@ -289,20 +295,20 @@ void getChar() {
 }
 
 /*******************/
-/* getNonBlank - une fonction pour appeler getChar jusqu'à ce qu'il retourne un caractère */
+/* getNonBlank */
 void getNonBlank() {
     while (isspace(nextChar))
         getChar();
 }
 
 /*******************/
- /* lex - un analyseur lexical simple pour les expressions arithmétiques */
+/* lex */
 int lex() {
     lexLen = 0;
+    error[0] = '\0'; /* Clear previous errors */
     getNonBlank();
     switch (charClass) {
-        /* Parse identifiers or keywords */
-        case LETTER :
+        case LETTER:
         case UNDERSCORE:
             addChar();
             getChar();
@@ -339,7 +345,7 @@ int lex() {
                 getChar();
             }
             if (nextChar == '.') {
-                addChar(); // Inclure le point decimal
+                addChar();
                 getChar();
                 while (charClass == DIGIT) {
                     addChar();
@@ -359,10 +365,6 @@ int lex() {
                 nextToken = INT_LIT;
                 strcpy(tokenType, "un entier");
             }
-            break;
-        case '\"':
-            lookup(nextChar);
-            getChar();
             break;
         case UNKNOWN:
             lookup(nextChar);
