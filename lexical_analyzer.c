@@ -82,7 +82,7 @@ typedef struct Keyword
     int class;
 } Keyword;
 
-Keyword keys[17] = {
+Keyword reservedKeys[17] = {
     {"program", KW_PROGRAM},
     {"var", KW_VAR},
     {"const", KW_CONST},
@@ -117,10 +117,11 @@ int main() {
     return 0;
 }
 
+/*used to check if an identifier is a keyword*/
 int checkKeyword(char *str){
     for (int i = 0; i < 17; i++){
-        if (strcmp(str, keys[i].tkn_code) ==0){
-            return keys[i].class;
+        if (strcmp(str, reservedKeys[i].tkn_code) ==0){
+            return reservedKeys[i].class;
         }
     }
     return -1;
