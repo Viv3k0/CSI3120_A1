@@ -57,6 +57,17 @@ bool isComment();
 #define QUESTION_MARK 41
 #define COLON 42
 
+#define KW_PROGRAM 43
+#define KW_CONST 44
+#define KW_FUNC 45
+#define KW_INT 46
+#define KW_FLOAT 47
+#define KW_BOOL 48
+#define KW_STRING 49
+#define KW_VOID 50
+#define KW_IF 51
+#define KW_ELSE 52
+
 /******************/
 /* main driver */
 int main() {
