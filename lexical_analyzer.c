@@ -57,7 +57,9 @@ bool isComment();
 #define QUESTION_MARK 41
 #define COLON 42
 
+/* reserved words */
 #define KW_PROGRAM 43
+#define KW_VAR 59
 #define KW_CONST 44
 #define KW_FUNC 45
 #define KW_INT 46
@@ -74,6 +76,32 @@ bool isComment();
 #define KW_FALSE 57
 #define KW_SHOW_ENV 58 
 
+typedef struct Keyword
+{
+    char *tkn_code;
+    int class;
+} Keyword;
+
+Keyword keys[17] = {
+    {"program", KW_PROGRAM},
+    {"var", KW_VAR},
+    {"const", KW_CONST},
+    {"func", KW_FUNC},
+    {"int", KW_INT},
+    {"float", KW_FLOAT},
+    {"bool", KW_BOOL},
+    {"string",KW_STRING},
+    {"void", KW_VOID},
+    {"if", KW_IF},
+    {"else", KW_ELSE},
+    {"while", KW_WHILE},
+    {"print", KW_PRINT},
+    {"return", KW_RETURN},
+    {"true", KW_TRUE},
+    {"false", KW_FALSE},
+    {"show_env", KW_SHOW_ENV}
+};
+
 /******************/
 /* main driver */
 int main() {
@@ -87,6 +115,15 @@ int main() {
         fclose(in_fp);
     }
     return 0;
+}
+
+int checkKeyword(char *str){
+    for (int i = 0; i < 17; i++){
+        if (strcmp(str, keys[i].tkn_code) ==0){
+            return keys[i].class;
+        }
+    }
+    return -1;
 }
 
 /*******************/
