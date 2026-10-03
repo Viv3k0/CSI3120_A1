@@ -59,22 +59,22 @@ bool isComment();
 
 /* reserved words */
 #define KW_PROGRAM 43
-#define KW_VAR 59
-#define KW_CONST 44
-#define KW_FUNC 45
-#define KW_INT 46
-#define KW_FLOAT 47
-#define KW_BOOL 48
-#define KW_STRING 49
-#define KW_VOID 50
-#define KW_IF 51
-#define KW_ELSE 52
-#define KW_WHILE 53
-#define KW_PRINT 54
-#define KW_RETURN 55
-#define KW_TRUE 56
-#define KW_FALSE 57
-#define KW_SHOW_ENV 58 
+#define KW_VAR 44
+#define KW_CONST 45
+#define KW_FUNC 46
+#define KW_INT 47
+#define KW_FLOAT 48
+#define KW_BOOL 49
+#define KW_STRING 50
+#define KW_VOID 51
+#define KW_IF 52
+#define KW_ELSE 53
+#define KW_WHILE 54
+#define KW_PRINT 55
+#define KW_RETURN 56
+#define KW_TRUE 57
+#define KW_FALSE 58
+#define KW_SHOW_ENV 59 
 
 typedef struct Keyword
 {
