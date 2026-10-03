@@ -1,0 +1,59 @@
+=== MiniScope: tests/t2_lex_errors.ms ===
+Line   2: Next token is: KW_PROGRAM   Next lexeme is: program
+Line   2: Next token is: IDENT        Next lexeme is: LexErrors
+Line   2: Next token is: LEFT_BRACE   Next lexeme is: {
+Line   3: Next token is: KW_VAR       Next lexeme is: var
+Line   3: Next token is: COLON        Next lexeme is: :
+Line   3: Next token is: KW_INT       Next lexeme is: int
+Line   3: Next token is: ASSIGN_OP    Next lexeme is: =
+Line   3: Next token is: INT_LIT      Next lexeme is: 2
+Line   3: Next token is: SEMICOLON    Next lexeme is: ;
+Line   4: Next token is: KW_VAR       Next lexeme is: var
+Line   4: Next token is: IDENT        Next lexeme is: price
+Line   4: Next token is: COLON        Next lexeme is: :
+Line   4: Next token is: KW_FLOAT     Next lexeme is: float
+Line   4: Next token is: ASSIGN_OP    Next lexeme is: =
+Line   4: Next token is: SEMICOLON    Next lexeme is: ;
+Line   5: Next token is: KW_VAR       Next lexeme is: var
+Line   5: Next token is: IDENT        Next lexeme is: total
+Line   5: Next token is: COLON        Next lexeme is: :
+Line   5: Next token is: KW_INT       Next lexeme is: int
+Line   5: Next token is: ASSIGN_OP    Next lexeme is: =
+Line   5: Next token is: INT_LIT      Next lexeme is: 5
+Line   5: Next token is: INT_LIT      Next lexeme is: 3
+Line   5: Next token is: SEMICOLON    Next lexeme is: ;
+Line   6: Next token is: KW_VAR       Next lexeme is: var
+Line   6: Next token is: IDENT        Next lexeme is: ok
+Line   6: Next token is: COLON        Next lexeme is: :
+Line   6: Next token is: KW_BOOL      Next lexeme is: bool
+Line   6: Next token is: ASSIGN_OP    Next lexeme is: =
+Line   6: Next token is: IDENT        Next lexeme is: a
+Line   6: Next token is: IDENT        Next lexeme is: b
+Line   6: Next token is: SEMICOLON    Next lexeme is: ;
+Line   7: Next token is: KW_VAR       Next lexeme is: var
+Line   7: Next token is: COLON        Next lexeme is: :
+Line   7: Next token is: KW_INT       Next lexeme is: int
+Line   7: Next token is: ASSIGN_OP    Next lexeme is: =
+Line   7: Next token is: INT_LIT      Next lexeme is: 1
+Line   7: Next token is: SEMICOLON    Next lexeme is: ;
+Line   8: Next token is: KW_VAR       Next lexeme is: var
+Line   8: Next token is: IDENT        Next lexeme is: Count
+Line   8: Next token is: COLON        Next lexeme is: :
+Line   8: Next token is: KW_INT       Next lexeme is: int
+Line   8: Next token is: ASSIGN_OP    Next lexeme is: =
+Line   8: Next token is: INT_LIT      Next lexeme is: 1
+Line   8: Next token is: SEMICOLON    Next lexeme is: ;
+Line   9: Next token is: KW_VAR       Next lexeme is: var
+Line   9: Next token is: IDENT        Next lexeme is: msg
+Line   9: Next token is: COLON        Next lexeme is: :
+Line   9: Next token is: KW_STRING    Next lexeme is: string
+Line   9: Next token is: ASSIGN_OP    Next lexeme is: =
+Line  12: Next token is: EOF          Next lexeme is: EOF
+Lexical error (line 3): illegal identifier '2ndPlace' (identifiers cannot start with a digit)
+Lexical error (line 4): malformed float literal '12.' (digit expected after '.')
+Lexical error (line 5): illegal character '@'
+Lexical error (line 6): illegal character '&'
+Lexical error (line 7): identifier 'this_identifier_is_far_too_long_for_miniscope' is longer than 31 characters
+Lexical error (line 9): unterminated string literal "never closed;
+Lexical error (line 10): unclosed block comment (opened here)
+--- 50 token(s), 7 lexical error(s) ---

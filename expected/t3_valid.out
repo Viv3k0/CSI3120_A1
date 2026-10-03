@@ -1,0 +1,43 @@
+=== MiniScope: tests/t3_valid.ms ===
+[decl] line 3: const RATE : float in scope 'global' (level 0) [static]
+[decl] line 4: var balance : float in scope 'global' (level 0) [static]
+[decl] line 5: var years : int in scope 'global' (level 0) [static]
+[decl] line 7: func interest(float, int) : float in scope 'global' (level 0) [-]
+[decl] line 7: param amount : float in scope 'interest' (level 1) [stack-dynamic]
+[decl] line 7: param n : int in scope 'interest' (level 1) [stack-dynamic]
+[bind] line 8: 'amount' -> param amount : float, declared at line 7 in scope 'interest' (level 1)
+[decl] line 8: var result : float in scope 'interest' (level 1) [stack-dynamic]
+[decl] line 9: var k : int in scope 'interest' (level 1) [stack-dynamic]
+[bind] line 10: 'k' -> var k : int, declared at line 9 in scope 'interest' (level 1)
+[bind] line 10: 'n' -> param n : int, declared at line 7 in scope 'interest' (level 1)
+[bind] line 11: 'result' -> var result : float, declared at line 8 in scope 'interest' (level 1)
+[bind] line 11: 'result' -> var result : float, declared at line 8 in scope 'interest' (level 1)
+[bind] line 11: 'result' -> var result : float, declared at line 8 in scope 'interest' (level 1)
+[bind] line 11: 'RATE' -> const RATE : float, declared at line 3 in scope 'global' (level 0)
+[bind] line 12: 'k' -> var k : int, declared at line 9 in scope 'interest' (level 1)
+[bind] line 12: 'k' -> var k : int, declared at line 9 in scope 'interest' (level 1)
+[bind] line 14: 'result' -> var result : float, declared at line 8 in scope 'interest' (level 1)
+[decl] line 17: func report(string, float) : void in scope 'global' (level 0) [-]
+[decl] line 17: param label : string in scope 'report' (level 1) [stack-dynamic]
+[decl] line 17: param value : float in scope 'report' (level 1) [stack-dynamic]
+[bind] line 18: 'label' -> param label : string, declared at line 17 in scope 'report' (level 1)
+[bind] line 19: 'value' -> param value : float, declared at line 17 in scope 'report' (level 1)
+[decl] line 22: func fact(int) : int in scope 'global' (level 0) [-]
+[decl] line 22: param n : int in scope 'fact' (level 1) [stack-dynamic]
+[bind] line 23: 'n' -> param n : int, declared at line 22 in scope 'fact' (level 1)
+[bind] line 24: 'n' -> param n : int, declared at line 22 in scope 'fact' (level 1)
+[bind] line 24: 'fact' -> func fact(int) : int, declared at line 22 in scope 'global' (level 0)
+[bind] line 24: 'n' -> param n : int, declared at line 22 in scope 'fact' (level 1)
+[bind] line 27: 'years' -> var years : int, declared at line 5 in scope 'global' (level 0)
+[bind] line 28: 'years' -> var years : int, declared at line 5 in scope 'global' (level 0)
+[bind] line 28: 'years' -> var years : int, declared at line 5 in scope 'global' (level 0)
+[bind] line 30: 'balance' -> var balance : float, declared at line 4 in scope 'global' (level 0)
+[bind] line 30: 'interest' -> func interest(float, int) : float, declared at line 7 in scope 'global' (level 0)
+[bind] line 30: 'balance' -> var balance : float, declared at line 4 in scope 'global' (level 0)
+[bind] line 30: 'years' -> var years : int, declared at line 5 in scope 'global' (level 0)
+[bind] line 31: 'report' -> func report(string, float) : void, declared at line 17 in scope 'global' (level 0)
+[bind] line 31: 'balance' -> var balance : float, declared at line 4 in scope 'global' (level 0)
+[bind] line 32: 'fact' -> func fact(int) : int, declared at line 22 in scope 'global' (level 0)
+[bind] line 33: 'balance' -> var balance : float, declared at line 4 in scope 'global' (level 0)
+[bind] line 33: 'years' -> var years : int, declared at line 5 in scope 'global' (level 0)
+--- parse successful; 0 semantic error(s), 0 warning(s) ---

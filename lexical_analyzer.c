@@ -120,7 +120,7 @@ int main() {
 /*used to check if an identifier is a keyword*/
 int checkKeyword(char *str){
     for (int i = 0; i < 17; i++){
-        if (strcmp(str, reservedKeys[i].tkn_code) ==0){
+        if (strcmp(str, reservedKeys[i].tkn_code) == 0){
             return reservedKeys[i].class;
         }
     }
