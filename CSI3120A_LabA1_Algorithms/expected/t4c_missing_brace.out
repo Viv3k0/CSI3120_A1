@@ -1,7 +1,0 @@
-=== MiniScope: tests/t4c_missing_brace.ms ===
-[decl] line 3: var z : int in scope 'global' (level 0) [static]
-[bind] line 4: 'z' -> var z : int, declared at line 3 in scope 'global' (level 0)
-[bind] line 5: 'z' -> var z : int, declared at line 3 in scope 'global' (level 0)
-[bind] line 5: 'z' -> var z : int, declared at line 3 in scope 'global' (level 0)
-Syntax error (line 7): expected '}' but found end of file
---- parsing stopped at the first syntax error ---
