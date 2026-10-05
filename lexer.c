@@ -187,23 +187,32 @@ static void lex_number(Lexer *lx) {
     
     int start  = lx->pos;
     int is_float = 0;
+    int skip_ident = 0;
 
     while (is_digit(peek(lx, 0))){
         advance(lx);
-        
+
         if (peek(lx, 0) == '.' && !is_float){
             is_float = 1;
             advance(lx);
             if (!is_digit(peek(lx, 0))){
+                skip_ident = 1;
                 error(lx, lx->line, "malformed float literal");
             }
         } else if (peek(lx, 0) == '_' || is_letter(peek(lx, 0))){
             error(lx, lx->line, "illegal identifier ... (identifiers cannot start with a digit)");
+            skip_ident = 1;
+        }
+
+            
+        if (skip_ident){
             while (is_ident_char(peek(lx, 0))){
                 advance(lx);
             }
+            return;
         }
     }
+
 
     char *num = substr(lx->text, start, lx->pos);
 
