@@ -150,7 +150,6 @@ static void skip_blanks_and_comments(Lexer *lx) {
             if (at_end(lx)){
                 error(lx, lx->line, "unclosed block comment (opened here)");
             }
-
         } else {
             break;
         }
@@ -185,7 +184,39 @@ static void lex_number(Lexer *lx) {
      *       - otherwise add INT_LIT or FLOAT_LIT.
      */
     (void)lx;
-    TODO("lex_number");
+    
+
+    add_token(lx, "INT_LIT", "3213213", lx->line);
+
+    int start  = lx->pos;
+    int is_float = 0;
+
+    while (is_digit(peek(lx, 0))){
+        advance(lx);
+        
+        if (peek(lx, 0) == '.' && !is_float){
+            is_float = 1;
+            advance(lx);
+            if (!is_digit(peek(lx, 0))){
+                error(lx, lx->line, "malformed float literal");
+            }
+        } else if (peek(lx, 0) == '_' || is_letter(peek(lx, 0))){
+            error(lx, lx->line, "illegal identifier ... (identifiers cannot start with a digit)");
+            while (is_ident_char(peek(lx, 0))){
+                advance(lx);
+            }
+        }
+    }
+
+    char *num = substr(lx->text, start, lx->pos);
+
+    if (is_float){
+        add_token(lx, "FLOAT_LIT", num, lx->line);
+    } else {
+        add_token(lx, "INT_LIT", num, lx->line);
+    }
+
+    printf("NUMBER: %s\n", num);
 }
 
 static void lex_string(Lexer *lx) {
