@@ -135,23 +135,25 @@ static void skip_blanks_and_comments(Lexer *lx) {
             while ((current = advance(lx)) != '\n'){}
         } else if (current == '/' && peek(lx, 1) == '*'){
             //skip /*
+            int block_open = lx->line;
             advance(lx);
             advance(lx);
 
             //skip block comment
             while (!at_end(lx)){
                 current = advance(lx);
-                if (current == '*' && peek(lx, 1) == '/'){
+                //if we hit end of block comment break
+                if (current == '*' && peek(lx, 0) == '/'){
                     current = advance(lx);
                     break;
                 }
             }
 
             if (at_end(lx)){
-                error(lx, lx->line, "unclosed block comment (opened here)");
+                error(lx, block_open, "unclosed block comment (opened here)");
             }
         } else {
-            break;
+            break; //non-blank/ comment break out of while
         }
 
         current = peek(lx, 0);
@@ -185,7 +187,7 @@ static void lex_number(Lexer *lx) {
      */
     (void)lx;
     
-    int start  = lx->pos;
+    int start = lx->pos;
     int is_float = 0;
     int skip_ident = 0;
 
@@ -203,8 +205,8 @@ static void lex_number(Lexer *lx) {
             error(lx, lx->line, "illegal identifier ... (identifiers cannot start with a digit)");
             skip_ident = 1;
         }
-
-            
+        
+        //skip the whole identifier and quit
         if (skip_ident){
             while (is_ident_char(peek(lx, 0))){
                 advance(lx);
@@ -212,7 +214,6 @@ static void lex_number(Lexer *lx) {
             return;
         }
     }
-
 
     char *num = substr(lx->text, start, lx->pos);
 
@@ -231,6 +232,20 @@ static void lex_string(Lexer *lx) {
      *       closing quote, report "unterminated string literal".
      */
     (void)lx;
+
+    // //skip first "
+    // advance(lx);
+
+    // int start = lx->pos;
+    // char c;
+
+    // while (c = peek(lx, 0) != '"'){
+    //     if (c == '\n'){
+    //         error(lx, lx->line, "unterminated string literal");
+    //     }
+    // }
+    
+
     TODO("lex_string");
 }
 
