@@ -124,7 +124,41 @@ static void skip_blanks_and_comments(Lexer *lx) {
     (void)advance;
     (void)at_end;
     (void)error;
-    TODO("skip_blanks_and_comments");
+    
+    char current = peek(lx, 0);
+
+    while (!at_end(lx)){
+
+        if (current == ' ' || current == '\n' || current == '\t'){
+            advance(lx);
+        } if (current == '/' && peek(lx, 1) == '/'){
+            while ((current = advance(lx)) != '\n'){}
+        } else if (current == '/' && peek(lx, 1) == '*'){
+            //skip /*
+            advance(lx);
+            advance(lx);
+
+            //skip block comment
+            while (!at_end(lx)){
+                current = advance(lx);
+                if (current == '*' && peek(lx, 1) == '/'){
+                    current = advance(lx);
+                    break;
+                }
+            }
+
+            if (at_end(lx)){
+                error(lx, lx->line, "unclosed block comment (opened here)");
+            }
+
+        } else {
+            break;
+        }
+
+        current = peek(lx, 0);
+    }
+
+    printf("skipped all blanks/comments, currently at line %d \n", lx->line);
 }
 
 static void lex_identifier(Lexer *lx) {
