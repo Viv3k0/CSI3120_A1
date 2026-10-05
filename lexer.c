@@ -233,20 +233,28 @@ static void lex_string(Lexer *lx) {
      */
     (void)lx;
 
-    // //skip first "
-    // advance(lx);
+    //skip first "
+    advance(lx);
 
-    // int start = lx->pos;
-    // char c;
+    int start = lx->pos;
+    char c = peek(lx, 0);
 
-    // while (c = peek(lx, 0) != '"'){
-    //     if (c == '\n'){
-    //         error(lx, lx->line, "unterminated string literal");
-    //     }
-    // }
-    
+    while (!at_end(lx) && c != '"'){
+        if (c == '\n'){
+            error(lx, lx->line, "unterminated string literal");
+            return;
+        }
+        advance(lx);
+        c = peek(lx, 0);
+    }
 
-    TODO("lex_string");
+    char *str = substr(lx->text, start, lx->pos);
+    add_token(lx, "STRING_LIT", str, lx->line);
+
+    //skip ending "
+    advance(lx);
+
+    printf("Found string: %s\n", str);
 }
 
 static void lex_operator(Lexer *lx) {
