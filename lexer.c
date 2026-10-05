@@ -239,7 +239,9 @@ static void lex_string(Lexer *lx) {
     int start = lx->pos;
     char c = peek(lx, 0);
 
+    //skip through characters until we find the ending "
     while (!at_end(lx) && c != '"'){
+        //cant have newline in the middle of a string
         if (c == '\n'){
             error(lx, lx->line, "unterminated string literal");
             return;
@@ -265,6 +267,7 @@ static void lex_operator(Lexer *lx) {
     (void)lx;
     (void)TWO_CHAR_OPS;
     (void)ONE_CHAR_OPS;
+
     TODO("lex_operator");
 }
 
