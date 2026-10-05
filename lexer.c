@@ -185,9 +185,6 @@ static void lex_number(Lexer *lx) {
      */
     (void)lx;
     
-
-    add_token(lx, "INT_LIT", "3213213", lx->line);
-
     int start  = lx->pos;
     int is_float = 0;
 
