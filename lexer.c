@@ -175,6 +175,7 @@ static void lex_identifier(Lexer *lx) {
     (void)is_ident_char;
     (void)add_token;
     (void)RESERVED_WORDS;
+    
     TODO("lex_identifier");
 }
 
