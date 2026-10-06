@@ -82,8 +82,11 @@ static char *substr(const char *s, int start, int end) {
 }
 
 static const char *lookup(const char *table[][2], const char *key) {
-    for (int k = 0; table[k][0] != NULL; k++)
+            printf("KEY: xxx%sxx\n", key);
+    for (int k = 0; table[k][0] != NULL; k++){
         if (strcmp(table[k][0], key) == 0) return table[k][1];
+
+    }
     return NULL;
 }
 
@@ -123,16 +126,18 @@ static void skip_blanks_and_comments(Lexer *lx) {
     (void)peek;
     (void)advance;
     (void)at_end;
-    (void)error;
-    
+    (void)error;    
     char current = peek(lx, 0);
 
     while (!at_end(lx)){
 
-        if (current == ' ' || current == '\n' || current == '\t'){
+        if (current <= 32 || current == '\n' || current == '\t'){
             advance(lx);
-        } if (current == '/' && peek(lx, 1) == '/'){
-            while ((current = advance(lx)) != '\n'){}
+        } else if (current == '/' && peek(lx, 1) == '/'){
+            current = advance(lx);
+            while (current != '\n'){
+                current = advance(lx);
+            }
         } else if (current == '/' && peek(lx, 1) == '*'){
             //skip /*
             int block_open = lx->line;
@@ -153,7 +158,7 @@ static void skip_blanks_and_comments(Lexer *lx) {
                 error(lx, block_open, "unclosed block comment (opened here)");
             }
         } else {
-            break; //non-blank/ comment break out of while
+            break; //non-blank/comment break out of while
         }
 
         current = peek(lx, 0);
@@ -179,17 +184,14 @@ static void lex_identifier(Lexer *lx) {
     char curr = peek(lx, 0);
     int start = lx->pos;
 
-    while(!at_end(lx)){
-        curr = advance(lx);
-        if(!is_ident_char(curr)){
-            break;
-        }
-        
+    while(!at_end(lx) && is_ident_char(curr)){
+        advance(lx);        
         curr = peek(lx, 0);
-        
     }
+    
     char* lexeme = substr(lx->text, start, lx->pos);
-    char* word = lookup(RESERVED_WORDS, lexeme);
+    const char *word = lookup(RESERVED_WORDS, lexeme);
+
     if(word != NULL){
         add_token(lx, word, lexeme, lx->line);
         return;
@@ -259,9 +261,9 @@ static void lex_string(Lexer *lx) {
     (void)lx;
 
     //skip first "
+    int start = lx->pos;
     advance(lx);
 
-    int start = lx->pos;
     char c = peek(lx, 0);
 
     //skip through characters until we find the ending "
@@ -274,12 +276,12 @@ static void lex_string(Lexer *lx) {
         advance(lx);
         c = peek(lx, 0);
     }
+    //skip ending "
+    advance(lx);
 
     char *str = substr(lx->text, start, lx->pos);
     add_token(lx, "STRING_LIT", str, lx->line);
 
-    //skip ending "
-    advance(lx);
 
     printf("Found string: %s\n", str);
 }

@@ -1,5 +1,4 @@
 // t1_tokens.ms -- every kind of token, plus both comment styles
-"your gay"
 program Tokens {
     /* a block comment
        that spans several lines */
