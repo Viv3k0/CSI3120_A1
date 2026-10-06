@@ -82,7 +82,6 @@ static char *substr(const char *s, int start, int end) {
 }
 
 static const char *lookup(const char *table[][2], const char *key) {
-            printf("KEY: xxx%sxx\n", key);
     for (int k = 0; table[k][0] != NULL; k++){
         if (strcmp(table[k][0], key) == 0) return table[k][1];
 
