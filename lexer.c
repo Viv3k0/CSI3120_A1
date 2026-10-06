@@ -175,8 +175,7 @@ static void lex_identifier(Lexer *lx) {
     (void)is_ident_char;
     (void)add_token;
     (void)RESERVED_WORDS;
-    
-    TODO("lex_identifier");
+
     char curr = peek(lx, 0);
     int start = lx->pos;
 
@@ -295,7 +294,7 @@ static void lex_operator(Lexer *lx) {
     (void)ONE_CHAR_OPS;
 
     char *op = substr(lx->text, lx->pos, lx->pos+2);
-    char two_char_op = lookup(TWO_CHAR_OPS, op);
+    char *two_char_op = lookup(TWO_CHAR_OPS, op);
 
     if (two_char_op != NULL){
         add_token(lx, two_char_op, op, lx->line);
@@ -308,7 +307,7 @@ static void lex_operator(Lexer *lx) {
     //opertion wasn't a 2 character operatioon, free the pointer for the string
     free(op);
     op = substr(lx->text, lx->pos, lx->pos+1);
-    char one_char_op = lookup(ONE_CHAR_OPS, op);
+    char *one_char_op = lookup(ONE_CHAR_OPS, op);
 
     if (one_char_op != NULL){
         add_token(lx, one_char_op, op, lx->line);
@@ -317,8 +316,6 @@ static void lex_operator(Lexer *lx) {
     }
 
     advance(lx);
-
-    TODO("lex_operator");
 }
 
 /* -- main loop -------------------------------------------------------------- */
