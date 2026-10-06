@@ -197,7 +197,11 @@ static void lex_identifier(Lexer *lx) {
     }
     
     if(strlen(lexeme) > MAX_IDENT_LEN){
-        error(lx, lx->line, "longer than MAX_IDENT_LEN characters");
+        char *err_msg = malloc(sizeof(char) * (46 + strlen(lexeme)));
+        sprintf(err_msg, "identifier \'%s\' is longer than 31 characters", lexeme);
+        err_msg[45 + strlen(lexeme)] = '\0';
+
+        error(lx, lx->line, err_msg);
         return;
     }
     add_token(lx, "IDENT", lexeme, lx->line);
@@ -269,7 +273,13 @@ static void lex_string(Lexer *lx) {
     while (!at_end(lx) && c != '"'){
         //cant have newline in the middle of a string
         if (c == '\n'){
-            error(lx, lx->line, "unterminated string literal");
+            char *unterminated_str = substr(lx->text, start, lx->pos);
+            char *err_msg = malloc(sizeof(char) * (32 + strlen(unterminated_str)));
+            err_msg[31 + strlen(unterminated_str)] = '\0';
+            sprintf(err_msg, "unterminated string literal %s", unterminated_str);
+            
+            error(lx, lx->line, err_msg);
+            free(unterminated_str);
             return;
         }
         advance(lx);
@@ -313,7 +323,12 @@ static void lex_operator(Lexer *lx) {
     if (one_char_op != NULL){
         add_token(lx, one_char_op, op, lx->line);
     } else {
-        error(lx, lx->line, "illegal character");
+        char *err_msg = malloc(sizeof(char) * 24);
+        sprintf(err_msg, "illegal character \'%c\'", *op);
+        err_msg[23] = '\0';
+
+        error(lx, lx->line, err_msg);
+        free(op); //dont need the character anymore
     }
 
     advance(lx);
