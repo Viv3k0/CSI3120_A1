@@ -112,6 +112,14 @@ static void error(Lexer *lx, int line, const char *msg) {
     r->nerrors++;
 }
 
+//simple function to format an error message concatanated with some data
+char *format_err(char *err_msg, char *data){
+    char *msg = malloc(sizeof(char) * (strlen(err_msg) + strlen(data)));
+    sprintf(msg, err_msg, data);
+    msg[strlen(err_msg) + strlen(data) - 1] = '\0';
+    return msg;
+}
+
 /* -- token recognizers ------------------------------------------------------ */
 static void skip_blanks_and_comments(Lexer *lx) {
     /* TODO: Skip white space, line comments and block comments.
@@ -197,11 +205,10 @@ static void lex_identifier(Lexer *lx) {
     }
     
     if(strlen(lexeme) > MAX_IDENT_LEN){
-        char *err_msg = malloc(sizeof(char) * (46 + strlen(lexeme)));
-        sprintf(err_msg, "identifier \'%s\' is longer than 31 characters", lexeme);
-        err_msg[45 + strlen(lexeme)] = '\0';
+        char *err_msg = format_err("identifier \'%s\' is longer than 31 characters", lexeme);
 
         error(lx, lx->line, err_msg);
+        free(lexeme); //dont need the lexeme since its illgeal
         return;
     }
     add_token(lx, "IDENT", lexeme, lx->line);
@@ -219,7 +226,6 @@ static void lex_number(Lexer *lx) {
     
     int start = lx->pos;
     int is_float = 0;
-    int skip_ident = 0;
 
     while (is_digit(peek(lx, 0))){
         advance(lx);
@@ -227,22 +233,31 @@ static void lex_number(Lexer *lx) {
         if (peek(lx, 0) == '.' && !is_float){
             is_float = 1;
             advance(lx);
+            
+            //malformed float skip and show error
             if (!is_digit(peek(lx, 0))){
-                skip_ident = 1;
-                error(lx, lx->line, "malformed float literal");
+                while (is_ident_char(peek(lx, 0))){ advance(lx); }
+
+                char *malformed_float = substr(lx->text, start, lx->pos);
+                char *err_msg = format_err("malformed float literal \'%s\' (digit expected after '.')", malformed_float);
+                
+                free(malformed_float);
+                error(lx, lx->line, err_msg);
+                return;
             }
+
+        //illegal identifier skip and show error
         } else if (peek(lx, 0) == '_' || is_letter(peek(lx, 0))){
-            error(lx, lx->line, "illegal identifier ... (identifiers cannot start with a digit)");
-            skip_ident = 1;
-        }
-        
-        //skip the whole identifier and quit
-        if (skip_ident){
-            while (is_ident_char(peek(lx, 0))){
-                advance(lx);
-            }
+            while (is_ident_char(peek(lx, 0))){ advance(lx); }
+
+            char *illgeal_ident = substr(lx->text, start, lx->pos);
+            char *err_msg = format_err("illegal identifier \'%s\' (identifiers cannot start with a digit)", illgeal_ident);
+
+            free(illgeal_ident);
+            error(lx, lx->line, err_msg);
             return;
         }
+        
     }
 
     char *num = substr(lx->text, start, lx->pos);
@@ -274,10 +289,9 @@ static void lex_string(Lexer *lx) {
         //cant have newline in the middle of a string
         if (c == '\n'){
             char *unterminated_str = substr(lx->text, start, lx->pos);
-            char *err_msg = malloc(sizeof(char) * (32 + strlen(unterminated_str)));
-            err_msg[31 + strlen(unterminated_str)] = '\0';
-            sprintf(err_msg, "unterminated string literal %s", unterminated_str);
-            
+            char *err_msg = format_err("unterminated string literal %s", unterminated_str);
+
+
             error(lx, lx->line, err_msg);
             free(unterminated_str);
             return;
