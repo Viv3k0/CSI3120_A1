@@ -124,7 +124,42 @@ static void skip_blanks_and_comments(Lexer *lx) {
     (void)advance;
     (void)at_end;
     (void)error;
-    TODO("skip_blanks_and_comments");
+    
+    char current = peek(lx, 0);
+
+    while (!at_end(lx)){
+
+        if (current == ' ' || current == '\n' || current == '\t'){
+            advance(lx);
+        } if (current == '/' && peek(lx, 1) == '/'){
+            while ((current = advance(lx)) != '\n'){}
+        } else if (current == '/' && peek(lx, 1) == '*'){
+            //skip /*
+            int block_open = lx->line;
+            advance(lx);
+            advance(lx);
+
+            //skip block comment
+            while (!at_end(lx)){
+                current = advance(lx);
+                //if we hit end of block comment break
+                if (current == '*' && peek(lx, 0) == '/'){
+                    current = advance(lx);
+                    break;
+                }
+            }
+
+            if (at_end(lx)){
+                error(lx, block_open, "unclosed block comment (opened here)");
+            }
+        } else {
+            break; //non-blank/ comment break out of while
+        }
+
+        current = peek(lx, 0);
+    }
+
+    printf("skipped all blanks/comments, currently at line %d \n", lx->line);
 }
 
 static void lex_identifier(Lexer *lx) {
@@ -154,7 +189,44 @@ static void lex_number(Lexer *lx) {
      *       - otherwise add INT_LIT or FLOAT_LIT.
      */
     (void)lx;
-    TODO("lex_number");
+    
+    int start = lx->pos;
+    int is_float = 0;
+    int skip_ident = 0;
+
+    while (is_digit(peek(lx, 0))){
+        advance(lx);
+
+        if (peek(lx, 0) == '.' && !is_float){
+            is_float = 1;
+            advance(lx);
+            if (!is_digit(peek(lx, 0))){
+                skip_ident = 1;
+                error(lx, lx->line, "malformed float literal");
+            }
+        } else if (peek(lx, 0) == '_' || is_letter(peek(lx, 0))){
+            error(lx, lx->line, "illegal identifier ... (identifiers cannot start with a digit)");
+            skip_ident = 1;
+        }
+        
+        //skip the whole identifier and quit
+        if (skip_ident){
+            while (is_ident_char(peek(lx, 0))){
+                advance(lx);
+            }
+            return;
+        }
+    }
+
+    char *num = substr(lx->text, start, lx->pos);
+
+    if (is_float){
+        add_token(lx, "FLOAT_LIT", num, lx->line);
+    } else {
+        add_token(lx, "INT_LIT", num, lx->line);
+    }
+
+    printf("NUMBER: %s\n", num);
 }
 
 static void lex_string(Lexer *lx) {
@@ -163,7 +235,31 @@ static void lex_string(Lexer *lx) {
      *       closing quote, report "unterminated string literal".
      */
     (void)lx;
-    TODO("lex_string");
+
+    //skip first "
+    advance(lx);
+
+    int start = lx->pos;
+    char c = peek(lx, 0);
+
+    //skip through characters until we find the ending "
+    while (!at_end(lx) && c != '"'){
+        //cant have newline in the middle of a string
+        if (c == '\n'){
+            error(lx, lx->line, "unterminated string literal");
+            return;
+        }
+        advance(lx);
+        c = peek(lx, 0);
+    }
+
+    char *str = substr(lx->text, start, lx->pos);
+    add_token(lx, "STRING_LIT", str, lx->line);
+
+    //skip ending "
+    advance(lx);
+
+    printf("Found string: %s\n", str);
 }
 
 static void lex_operator(Lexer *lx) {
@@ -174,6 +270,31 @@ static void lex_operator(Lexer *lx) {
     (void)lx;
     (void)TWO_CHAR_OPS;
     (void)ONE_CHAR_OPS;
+
+    char *op = substr(lx->text, lx->pos, lx->pos+2);
+    char two_char_op = lookup(TWO_CHAR_OPS, op);
+
+    if (two_char_op != NULL){
+        add_token(lx, two_char_op, op, lx->line);
+        //skip the opertator characters
+        advance(lx);
+        advance(lx);
+        return;
+    }
+
+    //opertion wasn't a 2 character operatioon, free the pointer for the string
+    free(op);
+    op = substr(lx->text, lx->pos, lx->pos+1);
+    char one_char_op = lookup(ONE_CHAR_OPS, op);
+
+    if (one_char_op != NULL){
+        add_token(lx, one_char_op, op, lx->line);
+    } else {
+        error(lx, lx->line, "illegal character");
+    }
+
+    advance(lx);
+
     TODO("lex_operator");
 }
 
