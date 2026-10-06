@@ -141,6 +141,9 @@ static void lex_identifier(Lexer *lx) {
     (void)add_token;
     (void)RESERVED_WORDS;
     TODO("lex_identifier");
+    char curr = peek(lx, 0);
+   //random add_token(lx, curr, curr, 2);
+    //
 }
 
 static void lex_number(Lexer *lx) {
