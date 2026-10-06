@@ -337,9 +337,7 @@ static void lex_operator(Lexer *lx) {
     if (one_char_op != NULL){
         add_token(lx, one_char_op, op, lx->line);
     } else {
-        char *err_msg = malloc(sizeof(char) * 24);
-        sprintf(err_msg, "illegal character \'%c\'", *op);
-        err_msg[23] = '\0';
+        char *err_msg = format_err("illegal character \'%s\'", op);
 
         error(lx, lx->line, err_msg);
         free(op); //dont need the character anymore
