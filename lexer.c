@@ -177,6 +177,31 @@ static void lex_identifier(Lexer *lx) {
     (void)RESERVED_WORDS;
     
     TODO("lex_identifier");
+    char curr = peek(lx, 0);
+    int start = lx->pos;
+
+    while(!at_end(lx)){
+        curr = advance(lx);
+        if(!is_ident_char(curr)){
+            break;
+        }
+        
+        curr = peek(lx, 0);
+        
+    }
+    char* lexeme = substr(lx->text, start, lx->pos);
+    char* word = lookup(RESERVED_WORDS, lexeme);
+    if(word != NULL){
+        add_token(lx, word, lexeme, lx->line);
+        return;
+    }
+    
+    if(strlen(lexeme) > MAX_IDENT_LEN){
+        error(lx, lx->line, "longer than MAX_IDENT_LEN characters");
+        return;
+    }
+    add_token(lx, "IDENT", lexeme, lx->line);
+    
 }
 
 static void lex_number(Lexer *lx) {
