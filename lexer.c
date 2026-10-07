@@ -211,6 +211,7 @@ static void lex_identifier(Lexer *lx) {
         free(lexeme); //dont need the lexeme since its illgeal
         return;
     }
+    
     add_token(lx, "IDENT", lexeme, lx->line);
     
 }

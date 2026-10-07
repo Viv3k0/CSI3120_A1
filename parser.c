@@ -287,7 +287,27 @@ static void parse_const_decl(Parser *p) {
     /* TODO: Like parse_var_decl, but the initializer is mandatory and the symbol's kind is "const".
      */
     (void)p;
-    TODO("parse_const_decl");
+    // TODO("parse_const_decl");
+
+    char msg[MSG];
+    enter(p, "const_decl");
+    expect(p, "KW_CONST");
+
+    Token *name = expect(p, "IDENT");
+    expect(p, "COLON");
+    const char *assigned_type = parse_type(p);
+
+    if (!at(p, "ASSIGN_OP")){
+        printf("Whatttt\n");
+        return;
+    }
+
+    advance(p);    
+    const char *found_type = parse_expr(p);   
+    expect(p, "SEMICOLON");
+
+    declare(p, symbol_new(name->lexeme, "const", assigned_type, name->line, p->st.current, NULL, 0));
+    leave(p, "const_decl");
 }
 
 /* <param> -> IDENT : <type>   (the name, line and type are returned through pointers) */
@@ -474,8 +494,18 @@ static const char *parse_expr(Parser *p) {
     (void)p;
     (void)parse_and_expr;
     (void)logical;
-    TODO("parse_expr");
-    return NULL;
+    // TODO("parse_expr");
+
+    enter(p, "expr");
+    const char *r = parse_and_expr(p);
+
+    while (at(p, "OR_OP")){
+        Token *op = advance(p);
+        r = logical(p, r, parse_and_expr(p), op);
+    }
+    
+    leave(p, "expr");
+    return r;
 }
 
 /* <and_expr> -> <rel_expr> { && <rel_expr> } */
@@ -485,7 +515,17 @@ static const char *parse_and_expr(Parser *p) {
     (void)p;
     (void)parse_rel_expr;
     TODO("parse_and_expr");
-    return NULL;
+
+    enter(p, "and_expr");
+    const char *r = parse_rel_expr(p);
+
+    while(at(p, "AND_OP")){
+        Token *op = advance(p);
+        r = logical(p, r, parse_rel_expr(p), op);
+    }
+
+    leave(p, "and_expr");
+    return r;
 }
 
 /* <rel_expr> -> <add_expr> [ <rel_op> <add_expr> ] */
@@ -497,7 +537,33 @@ static const char *parse_rel_expr(Parser *p) {
     (void)p;
     (void)parse_add_expr;
     TODO("parse_rel_expr");
-    return NULL;
+    enter(p, "rel_expr");
+
+    const char *a = parse_add_expr(p);
+    const char *b;
+
+    if (at(p, "rel_op")){
+        Token *op = advance(p);
+        b = parse_add_expr(p);
+
+        if((same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP"))){
+            if (!same(a, b)){
+                printf("comparing different types\n");
+                return NULL;
+            }
+        } else if ((same(op->kind, "LT_OP") || same(op->kind, "GT_OP") || same(op->kind, "LE_OP") || same(op->kind, "GE_OP")) ){
+            if (!(is_numeric(a) && is_numeric(b))){
+                printf("cant order non-numeric characters\n");
+                return NULL;
+            }
+        } else {
+            printf("invalid operator\n");
+            return NULL;
+        }
+    }
+
+    leave(p, "rel_expr");
+    return "bool";
 }
 
 /* <add_expr> -> <term> { ( + | - ) <term> } */
@@ -519,7 +585,17 @@ static const char *parse_term(Parser *p) {
     (void)p;
     (void)parse_factor;
     TODO("parse_term");
-    return NULL;
+
+    enter(p, "term");
+    const char *t = parse_factor(p);
+
+    while (at(p, "MULT_OP") || at(p, "DIV_OP") || at(p, "MOD_OP")){
+        Token *op = advance(p);
+        t = arith(p, t, parse_factor(p), op);
+    }
+    
+    leave(p, "term");
+    return t;
 }
 
 /* <factor> -> ! <factor> | - <factor> | <primary> */
