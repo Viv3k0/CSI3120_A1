@@ -514,7 +514,6 @@ static const char *parse_and_expr(Parser *p) {
      */
     (void)p;
     (void)parse_rel_expr;
-    TODO("parse_and_expr");
 
     enter(p, "and_expr");
     const char *r = parse_rel_expr(p);
@@ -536,7 +535,7 @@ static const char *parse_rel_expr(Parser *p) {
      */
     (void)p;
     (void)parse_add_expr;
-    TODO("parse_rel_expr");
+
     enter(p, "rel_expr");
 
     const char *a = parse_add_expr(p);
@@ -584,7 +583,6 @@ static const char *parse_term(Parser *p) {
      */
     (void)p;
     (void)parse_factor;
-    TODO("parse_term");
 
     enter(p, "term");
     const char *t = parse_factor(p);
@@ -593,7 +591,7 @@ static const char *parse_term(Parser *p) {
         Token *op = advance(p);
         t = arith(p, t, parse_factor(p), op);
     }
-    
+
     leave(p, "term");
     return t;
 }
@@ -605,7 +603,28 @@ static const char *parse_factor(Parser *p) {
     (void)p;
     (void)parse_primary;
     TODO("parse_factor");
-    return NULL;
+
+    enter(p, "factor");
+    const char *t;
+
+    if (at(p, "NOT_OP")){
+        Token *op = advance(p);
+        t = parse_factor(p);
+        if (!same(t, "bool")){
+            return NULL;
+        }
+    } else if (at(p, "SUB_OP")){
+        Token *op = advance(p);
+        t = parse_factor(p);
+        if (!is_numeric(t)){
+            return NULL;
+        }
+    } else {
+        t = parse_primary(p);
+    }
+
+    leave(p, "factor");
+    return t;
 }
 
 /* <primary> -> INT_LIT | FLOAT_LIT | STRING_LIT | true | false
@@ -619,5 +638,26 @@ static const char *parse_primary(Parser *p) {
     (void)parse_call;
     (void)resolve;
     TODO("parse_primary");
+    enter(p, "primary");
+    Token *t = advance(p);
+    
+    if (same(t->kind, "INT_LIT")){
+        return "int";
+    } else if (same(t->kind, "FLOAT_LIT")){
+        return "float";
+    } else if (same(t->kind, "STRING_LIT")){
+        return "string";
+    } else if (same(t->kind, "KW_TRUE") || same(t->kind, "KW_FALSE")) {
+        return "bool";
+    } else if (same(t->kind, "IDENT")){
+        Symbol *s = resolve(p, t->lexeme, t->line);
+        
+        if (same(s->kind, "KW_FUNC")){
+
+        }
+    }
+    
+
+    leave(p, "primary");
     return NULL;
 }

@@ -170,8 +170,6 @@ static void skip_blanks_and_comments(Lexer *lx) {
 
         current = peek(lx, 0);
     }
-
-    printf("skipped all blanks/comments, currently at line %d \n", lx->line);
 }
 
 static void lex_identifier(Lexer *lx) {
@@ -211,9 +209,8 @@ static void lex_identifier(Lexer *lx) {
         free(lexeme); //dont need the lexeme since its illgeal
         return;
     }
-    
+
     add_token(lx, "IDENT", lexeme, lx->line);
-    
 }
 
 static void lex_number(Lexer *lx) {
@@ -268,8 +265,6 @@ static void lex_number(Lexer *lx) {
     } else {
         add_token(lx, "INT_LIT", num, lx->line);
     }
-
-    printf("NUMBER: %s\n", num);
 }
 
 static void lex_string(Lexer *lx) {
@@ -305,9 +300,6 @@ static void lex_string(Lexer *lx) {
 
     char *str = substr(lx->text, start, lx->pos);
     add_token(lx, "STRING_LIT", str, lx->line);
-
-
-    printf("Found string: %s\n", str);
 }
 
 static void lex_operator(Lexer *lx) {
