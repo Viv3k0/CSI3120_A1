@@ -314,13 +314,23 @@ static void parse_const_decl(Parser *p) {
 }
 
 /* <param> -> IDENT : <type>   (the name, line and type are returned through pointers) */
-static void parse_param(Parser *p, Token **name, const char **type) {
+static void parse_param(Parser *p, Token **name, const char **type, int *line) { // line pointer was missing..
     /* TODO: <param> -> IDENT : <type>. Give back the name, the line and the type.
      */
     (void)p;
     (void)name;
     (void)type;
     TODO("parse_param");
+
+    enter(p, "param");
+    Token *param = expect(p, "IDENT");
+    expect(p, "COLON");
+
+    *type = parse_type(p);
+    *name = param->lexeme;
+    *line = param->line;
+
+    leave(p, "param");
 }
 
 /* <func_decl>  -> func IDENT ( <params> ) : <ret_type> <block>
@@ -343,7 +353,15 @@ static void parse_func_decl(Parser *p) {
     Token *name = expect(p, "IDENT");
 
     declare(p->st.current->parent, name->lexeme);
-    
+
+    st_open_scope(&p->st, name->lexeme);
+    expect(p, "RIGHT_PAREN");
+
+    //check if function has any declared parameters
+    if (!at(p, "LEFT_PAREN")){
+        
+    }
+
     leave(p, "func_decl");
 }
 
