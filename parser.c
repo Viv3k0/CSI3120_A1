@@ -270,10 +270,13 @@ static void parse_var_decl(Parser *p) {
     const char *typ = parse_type(p);
     if (at(p, "ASSIGN_OP")) {
         advance(p);
+        Token *t = tok(p);
         const char *etype = parse_expr(p);      /* initializer is evaluated BEFORE the name is bound */
         if (!assignable(typ, etype)) {
             snprintf(msg, sizeof msg, "type mismatch: cannot initialize '%s' (%s) with a %s value",
                      name->lexeme, typ, etype);
+
+            printf("FOUND LEXEME: %s\n", t->lexeme);
             sem_error(p, name->line, msg);
         }
     }
@@ -333,6 +336,15 @@ static void parse_func_decl(Parser *p) {
     (void)p;
     (void)parse_param;
     TODO("parse_func_decl");
+
+    enter(p, "func_decl");
+
+    expect(p, "KW_FUNC");
+    Token *name = expect(p, "IDENT");
+
+    declare(p->st.current->parent, name->lexeme);
+    
+    leave(p, "func_decl");
 }
 
 /* <stmt> -> <ident_stmt> | <if_stmt> | <while_stmt> | <print_stmt>
@@ -559,10 +571,12 @@ static const char *parse_rel_expr(Parser *p) {
             printf("invalid operator\n");
             return NULL;
         }
+
+        a = "bool";
     }
 
     leave(p, "rel_expr");
-    return "bool";
+    return a;
 }
 
 /* <add_expr> -> <term> { ( + | - ) <term> } */
@@ -602,19 +616,19 @@ static const char *parse_factor(Parser *p) {
      */
     (void)p;
     (void)parse_primary;
-    TODO("parse_factor");
+    // TODO("parse_factor");
 
     enter(p, "factor");
     const char *t;
 
     if (at(p, "NOT_OP")){
-        Token *op = advance(p);
+        advance(p);
         t = parse_factor(p);
         if (!same(t, "bool")){
             return NULL;
         }
     } else if (at(p, "SUB_OP")){
-        Token *op = advance(p);
+        advance(p);
         t = parse_factor(p);
         if (!is_numeric(t)){
             return NULL;
@@ -637,7 +651,7 @@ static const char *parse_primary(Parser *p) {
     (void)p;
     (void)parse_call;
     (void)resolve;
-    TODO("parse_primary");
+    // TODO("parse_primary");
     enter(p, "primary");
     Token *t = advance(p);
     
@@ -651,12 +665,28 @@ static const char *parse_primary(Parser *p) {
         return "bool";
     } else if (same(t->kind, "IDENT")){
         Symbol *s = resolve(p, t->lexeme, t->line);
-        
-        if (same(s->kind, "KW_FUNC")){
 
+        if (same(s->kind, "func")){
+            if (!at(p, "RIGHT_PAREN")){
+                printf("expression expected\n");
+                return NULL;
+            }  else if (same(s->type, "void")){
+                printf("expression expected (not void)\n");
+                return NULL;
+            }
+
+            expect(p, "LEFT_PAREN");
+            advance(p);
+            expect(p, "RIGHT_PAREN");
         }
+
+        return s->type;
+    } else {
+        expect(p, "LEFT_PAREN");
+        const char *type = parse_expr(p);
+        expect(p, "RIGHT_PAREN");
+        return type;
     }
-    
 
     leave(p, "primary");
     return NULL;

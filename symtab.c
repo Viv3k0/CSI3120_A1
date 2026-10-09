@@ -83,6 +83,8 @@ void st_close_scope(SymbolTable *st) {
     free(sc);
 }
 
+Symbol *st_lookup_from(Scope *scope, const char *name);
+
 /* -- declarations ------------------------------------------------------------ */
 int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden) {
     /* TODO: Bind the symbol's name in the CURRENT scope.
@@ -94,8 +96,25 @@ int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden)
     (void)sym;
     (void)previous;
     (void)hidden;
-    TODO("st_declare");
-    return 0;
+    // TODO("st_declare");
+
+    for (int i = 0; i < st->current->nsymbols; i++){
+        if (strcmp(sym->name, st->current->symbols[i]->name) == 0){
+            *previous = st->current->symbols[i];
+            return 0;
+        }
+    }
+
+    *hidden = st_lookup_from(st->current->parent, sym->name);
+
+    if (st->current->cap == st->current->nsymbols){
+        st->current->symbols = realloc(st->current->symbols, sizeof(Symbol) * (1 + st->current->nsymbols));
+        st->current->cap++;
+    }
+
+    st->current->symbols[st->current->nsymbols++] = sym;
+
+    return 1;
 }
 
 /* -- lookup (static scoping) ------------------------------------------------- */
@@ -105,7 +124,18 @@ Symbol *st_lookup_from(Scope *scope, const char *name) {
      */
     (void)scope;
     (void)name;
-    TODO("st_lookup_from");
+    // TODO("st_lookup_from");
+    
+    while (scope != NULL){
+        for (int s = 0; s < scope->nsymbols; s++){
+            if (strcmp(scope->symbols[s]->name, name) == 0){
+                return scope->symbols[s];
+            }
+        }
+        
+        scope = scope->parent;
+    }
+
     return NULL;
 }
 
