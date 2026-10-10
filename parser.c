@@ -757,15 +757,16 @@ static const char *parse_primary(Parser *p) {
     // TODO("parse_primary");
     enter(p, "primary");
     Token *t = advance(p);
+    const char *type;
     
     if (same(t->kind, "INT_LIT")){
-        return "int";
+        type = "int";
     } else if (same(t->kind, "FLOAT_LIT")){
-        return "float";
+        type = "float";
     } else if (same(t->kind, "STRING_LIT")){
-        return "string";
+        type = "string";
     } else if (same(t->kind, "KW_TRUE") || same(t->kind, "KW_FALSE")) {
-        return "bool";
+        type = "bool";
     } else if (same(t->kind, "IDENT")){
         Symbol *s = resolve(p, t->lexeme, t->line);
 
@@ -778,17 +779,17 @@ static const char *parse_primary(Parser *p) {
                 return NULL;
             }
 
-            return parse_call(p, t);
+            type = parse_call(p, t);
+        } else {
+            type = s->type;
         }
 
-        return s->type;
     } else {
         expect(p, "LEFT_PAREN");
-        const char *type = parse_expr(p);
+        type = parse_expr(p);
         expect(p, "RIGHT_PAREN");
-        return type;
     }
 
     leave(p, "primary");
-    return NULL;
+    return type;
 }
