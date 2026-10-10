@@ -112,6 +112,8 @@ int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden)
         st->current->cap++;
     }
 
+    // printf("adding: %s \n", sym->name);
+
     st->current->symbols[st->current->nsymbols++] = sym;
 
     return 1;

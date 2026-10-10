@@ -314,21 +314,18 @@ static void parse_const_decl(Parser *p) {
 }
 
 /* <param> -> IDENT : <type>   (the name, line and type are returned through pointers) */
-static void parse_param(Parser *p, Token **name, const char **type, int *line) { // line pointer was missing..
+static void parse_param(Parser *p, Token **name, const char **type) {
     /* TODO: <param> -> IDENT : <type>. Give back the name, the line and the type.
      */
     (void)p;
     (void)name;
     (void)type;
-    TODO("parse_param");
+    // TODO("parse_param");
 
     enter(p, "param");
-    Token *param = expect(p, "IDENT");
+    *name = expect(p, "IDENT");
     expect(p, "COLON");
-
     *type = parse_type(p);
-    *name = param->lexeme;
-    *line = param->line;
 
     leave(p, "param");
 }
@@ -345,22 +342,57 @@ static void parse_func_decl(Parser *p) {
      */
     (void)p;
     (void)parse_param;
-    TODO("parse_func_decl");
+    // TODO("parse_func_decl");
 
     enter(p, "func_decl");
 
     expect(p, "KW_FUNC");
-    Token *name = expect(p, "IDENT");
+    Token *func_name = expect(p, "IDENT");
+    expect(p, "LEFT_PAREN");
+    int num_params = 0;
 
-    declare(p->st.current->parent, name->lexeme);
-
-    st_open_scope(&p->st, name->lexeme);
-    expect(p, "RIGHT_PAREN");
+    Token **params = malloc(sizeof(char*));
+    const char **param_types = malloc(sizeof(char*));
 
     //check if function has any declared parameters
-    if (!at(p, "LEFT_PAREN")){
-        
+    while (!at(p, "RIGHT_PAREN")){
+        params = realloc(params, sizeof(Token*) * (num_params + 1));
+        param_types = realloc(param_types, sizeof(char*) * (num_params + 1));
+
+        parse_param(p, &params[num_params], &param_types[num_params]);
+        num_params++;
+
+        if (!at(p, "RIGHT_PAREN")) { expect(p, "COMMA"); }
     }
+
+    //skip the closing )
+    advance(p);
+
+    expect(p, "COLON");
+
+    Token *return_type = tok(p);
+    const char *type;
+
+    if (same(return_type->lexeme, "void")){
+        type = "void";
+    } else {
+        type = parse_type(p);
+    }
+
+    //declare funtion, open scope and declare params
+    declare(p, symbol_new(func_name->lexeme, "func", type, func_name->line, p->st.current, param_types, num_params));
+
+    Scope *func_scope =  st_open_scope(&p->st, func_name->lexeme);
+
+    for (int i = 0; i < num_params; i++){
+        declare(p, symbol_new(params[i]->lexeme, "param", param_types[i], params[i]->line, func_scope, NULL, 0));
+    }
+
+    parse_block(p, 0);
+    st_close_scope(&p->st);
+
+    free(param_types);
+    free(params);
 
     leave(p, "func_decl");
 }
