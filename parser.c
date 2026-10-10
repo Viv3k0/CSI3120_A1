@@ -378,7 +378,7 @@ static void parse_func_decl(Parser *p) {
         type = parse_type(p);
     }
 
-    //declare funtion, open scope and declare params
+    //declare function, open scope and declare params
     declare(p, symbol_new(func_name->lexeme, "func", type, func_name->line, p->st.current, param_types, num_params));
     Scope *func_scope =  st_open_scope(&p->st, func_name->lexeme);
 
@@ -433,6 +433,9 @@ static void parse_ident_stmt(Parser *p) {
 
         if (same(s->kind, "func")){ 
             printf("CANT ASSIGN STUFF TO FUNCTION\n");
+            exit(0);
+        } else if (same(s->kind, "const")){
+            printf("CANT ASSIGN STUFF TO CONST\n");
             exit(0);
         }
 
@@ -655,6 +658,7 @@ static const char *parse_rel_expr(Parser *p) {
     const char *a = parse_add_expr(p);
     const char *b;
 
+    //check for relational opeater
     if(at(p, "EQ_OP") || at(p, "NEQ_OP") || at(p, "LT_OP") || at(p, "GT_OP") || at(p, "LE_OP") || at(p, "GE_OP" )){
         Token *op = advance(p);
         b = parse_add_expr(p);
