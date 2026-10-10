@@ -418,7 +418,36 @@ static void parse_ident_stmt(Parser *p) {
      *       of the expression is not assignable to the type of the variable.
      */
     (void)p;
-    TODO("parse_ident_stmt");
+    // TODO("parse_ident_stmt");
+    enter(p, "ident_stmt");
+
+    Token *ident = expect(p, "IDENT");
+    expect(p, "ASSIGN_OP");
+
+    //check for function call
+    if (at(p, "LEFT_PAREN")){
+        parse_call(p, ident);
+    } else {
+        //check if its possible to assign the given expression to the ident
+
+        Symbol *s = resolve(p, ident->lexeme, ident->line);
+
+        if (same(s->kind, "func")){ 
+            printf("CANT ASSIGN STUFF TO FUNCTION\n");
+            exit(0);
+        }
+
+        const char *t = parse_expr(p);
+
+        if (!assignable(s->type, t)){
+            printf("cant aassign typeeee %s to %s \n", t, s->type);
+            exit(0);
+        }
+    }
+
+    expect(p, "SEMICOLON");
+
+    leave(p,"ident_stmt");
 }
 
 static void check_condition(Parser *p, const char *t, int line, const char *what) {
@@ -734,9 +763,7 @@ static const char *parse_primary(Parser *p) {
                 return NULL;
             }
 
-            expect(p, "LEFT_PAREN");
-            advance(p);
-            expect(p, "RIGHT_PAREN");
+            return parse_call(p, t);
         }
 
         return s->type;
