@@ -306,7 +306,7 @@ static void parse_const_decl(Parser *p) {
     }
 
     advance(p);    
-    const char *found_type = parse_expr(p);   
+    const char *found_type = parse_expr(p); //check if found type matches the declared type
     expect(p, "SEMICOLON");
 
     declare(p, symbol_new(name->lexeme, "const", assigned_type, name->line, p->st.current, NULL, 0));
@@ -354,7 +354,7 @@ static void parse_func_decl(Parser *p) {
     Token **params = malloc(sizeof(char*));
     const char **param_types = malloc(sizeof(char*));
 
-    //check if function has any declared parameters
+    //check and read any declared parameters into params and types arrays
     while (!at(p, "RIGHT_PAREN")){
         params = realloc(params, sizeof(Token*) * (num_params + 1));
         param_types = realloc(param_types, sizeof(char*) * (num_params + 1));
@@ -367,21 +367,19 @@ static void parse_func_decl(Parser *p) {
 
     //skip the closing )
     advance(p);
-
     expect(p, "COLON");
 
-    Token *return_type = tok(p);
+    //find the return type
     const char *type;
-
-    if (same(return_type->lexeme, "void")){
+    if (at(p, "KW_VOID")){
         type = "void";
+        advance(p);
     } else {
         type = parse_type(p);
     }
 
     //declare funtion, open scope and declare params
     declare(p, symbol_new(func_name->lexeme, "func", type, func_name->line, p->st.current, param_types, num_params));
-
     Scope *func_scope =  st_open_scope(&p->st, func_name->lexeme);
 
     for (int i = 0; i < num_params; i++){
@@ -446,7 +444,21 @@ static void parse_while_stmt(Parser *p) {
     /* TODO: Use check_condition(...) on the type of the condition. The body opens a new scope.
      */
     (void)p;
-    TODO("parse_while_stmt");
+    // TODO("parse_while_stmt");
+
+    enter(p, "while_stmt");
+
+    expect(p, "KW_WHILE");
+    expect(p, "LEFT_PAREN");
+    
+    Token *cond = tok(p);
+    const char *t = parse_expr(p);
+    check_condition(p, t, cond->line, cond->lexeme);
+
+    expect(p, "RIGHT_PAREN");
+    parse_block(p, 1);
+
+    leave(p, "while_stmt");
 }
 
 /* <print_stmt> -> print ( <expr> ) ; */
@@ -603,27 +615,24 @@ static const char *parse_rel_expr(Parser *p) {
     const char *a = parse_add_expr(p);
     const char *b;
 
-    if (at(p, "rel_op")){
+    if(at(p, "EQ_OP") || at(p, "NEQ_OP") || at(p, "LT_OP") || at(p, "GT_OP") || at(p, "LE_OP") || at(p, "GE_OP" )){
         Token *op = advance(p);
         b = parse_add_expr(p);
 
-        if((same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP"))){
+        if (same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP")){
             if (!same(a, b)){
                 printf("comparing different types\n");
                 return NULL;
             }
-        } else if ((same(op->kind, "LT_OP") || same(op->kind, "GT_OP") || same(op->kind, "LE_OP") || same(op->kind, "GE_OP")) ){
+        } else {
             if (!(is_numeric(a) && is_numeric(b))){
                 printf("cant order non-numeric characters\n");
                 return NULL;
             }
-        } else {
-            printf("invalid operator\n");
-            return NULL;
         }
 
         a = "bool";
-    }
+    } 
 
     leave(p, "rel_expr");
     return a;
