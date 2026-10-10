@@ -41,12 +41,3 @@
 [bind] line 33: 'balance' -> var balance : float, declared at line 4 in scope 'global' (level 0)
 [bind] line 33: 'years' -> var years : int, declared at line 5 in scope 'global' (level 0)
 --- parse successful; 0 semantic error(s), 0 warning(s) ---
-[decl] line 3: const RATE : float in scope 'global' (level 0) [static]
-[decl] line 4: var balance : float in scope 'global' (level 0) [static]
-[decl] line 5: var years : int in scope 'global' (level 0) [static]
-[decl] line 7: func interest(float, int) : float in scope 'global' (level 0) [-]
-[decl] line 7: param amount : float in scope 'interest' (level 1) [stack-dynamic]
-[decl] line 7: param n : int in scope 'interest' (level 1) [stack-dynamic]
-[bind] line 8: 'amount' -> param amount : float, declared at line 7 in scope 'interest' (level 1)
-[decl] line 8: var result : float in scope 'interest' (level 1) [stack-dynamic]
-[decl] line 9: var k : int in scope 'interest' (level 1) [stack-dynamic]

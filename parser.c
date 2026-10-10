@@ -429,7 +429,6 @@ static void parse_ident_stmt(Parser *p) {
         parse_call(p, ident);
     } else {
         //check if its possible to assign the given expression to the ident
-
         Symbol *s = resolve(p, ident->lexeme, ident->line);
 
         if (same(s->kind, "func")){ 
@@ -508,7 +507,19 @@ static void parse_return_stmt(Parser *p) {
      *       function returning nothing; a returned value of the wrong type.
      */
     (void)p;
-    TODO("parse_return_stmt");
+    // TODO("parse_return_stmt");
+    
+    //how to check return type matches function type???
+    
+    enter(p, "return_stmt");
+    expect(p, "KW_RETURN");
+
+    if (!at(p, "SEMICOLON")){
+        const char *ret_type = parse_expr(p);
+    }
+
+    expect(p, "SEMICOLON");
+    leave(p, "return_stmt");
 }
 
 static void print_environment(Parser *p, int line) {
