@@ -365,6 +365,8 @@ static void parse_func_decl(Parser *p) {
         if (!at(p, "RIGHT_PAREN")) { expect(p, "COMMA"); }
     }
 
+
+
     //skip the closing )
     advance(p);
     expect(p, "COLON");
@@ -379,7 +381,8 @@ static void parse_func_decl(Parser *p) {
     }
 
     //declare function, open scope and declare params
-    declare(p, symbol_new(func_name->lexeme, "func", type, func_name->line, p->st.current, param_types, num_params));
+    Symbol *s_func = symbol_new(func_name->lexeme, "func", type, func_name->line, p->st.current, param_types, num_params);
+    declare(p, s_func);
     Scope *func_scope =  st_open_scope(&p->st, func_name->lexeme);
 
     for (int i = 0; i < num_params; i++){
@@ -517,8 +520,12 @@ static void parse_return_stmt(Parser *p) {
     enter(p, "return_stmt");
     expect(p, "KW_RETURN");
 
+    const char *ret_type;
+
     if (!at(p, "SEMICOLON")){
-        const char *ret_type = parse_expr(p);
+       ret_type = parse_expr(p);
+    } else {
+        ret_type = "void";
     }
 
     expect(p, "SEMICOLON");
@@ -666,12 +673,12 @@ static const char *parse_rel_expr(Parser *p) {
         if (same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP")){
             if (!same(a, b)){
                 printf("comparing different types\n");
-                return NULL;
+                exit(0);
             }
         } else {
             if (!(is_numeric(a) && is_numeric(b))){
                 printf("cant order non-numeric characters\n");
-                return NULL;
+                exit(0);
             }
         }
 
