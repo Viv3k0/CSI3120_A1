@@ -476,12 +476,8 @@ static void parse_if_stmt(Parser *p) {
     check_condition(p, t, cond->line, cond->lexeme);
     
     expect(p, "RIGHT_PAREN");
-    parse_block(p, 1); 
-    
-    if (at(p, "KW_ELSE")) {
-        advance(p);
-        parse_block(p, 1); 
-    }
+
+    //nah
     
     leave(p, "if_stmt");
 }
