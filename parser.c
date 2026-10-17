@@ -463,11 +463,24 @@ static void check_condition(Parser *p, const char *t, int line, const char *what
 /* <if_stmt>   -> if ( <expr> ) <block> <else_part>
  * <else_part> -> else <block> | epsilon */
 static void parse_if_stmt(Parser *p) {
-    /* TODO: Use check_condition(...) on the type of the condition. Each block opens a new scope.
-     */
-    (void)p;
-    (void)check_condition;
-    TODO("parse_if_stmt");
+    enter(p, "if_stmt");
+    
+    expect(p, "KW_IF");
+    expect(p, "LEFT_PAREN");
+    
+    Token *cond = tok(p);
+    const char *t = parse_expr(p);
+    check_condition(p, t, cond->line, cond->lexeme);
+    
+    expect(p, "RIGHT_PAREN");
+    parse_block(p, 1); 
+    
+    if (at(p, "KW_ELSE")) {
+        advance(p);
+        parse_block(p, 1); 
+    }
+    
+    leave(p, "if_stmt");
 }
 
 /* <while_stmt> -> while ( <expr> ) <block> */
