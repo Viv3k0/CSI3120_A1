@@ -98,6 +98,8 @@ int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden)
     (void)hidden;
     // TODO("st_declare");
 
+    //symbol to give back is *previous!!!
+
     for (int i = 0; i < st->current->nsymbols; i++){
         if (strcmp(sym->name, st->current->symbols[i]->name) == 0){
             *previous = st->current->symbols[i];

@@ -825,19 +825,24 @@ static const char *parse_primary(Parser *p) {
     (void)resolve;
     // TODO("parse_primary");
     enter(p, "primary");
-    Token *t = advance(p);
-    const char *type;
+    Token *t = tok(p);
+    const char *type = "";
 
 
     if (same(t->kind, "INT_LIT")){
+        advance(p);
         type = "int";
     } else if (same(t->kind, "FLOAT_LIT")){
+        advance(p);
         type = "float";
     } else if (same(t->kind, "STRING_LIT")){
+        advance(p);
         type = "string";
     } else if (same(t->kind, "KW_TRUE") || same(t->kind, "KW_FALSE")) {
+        advance(p);
         type = "bool";
     } else if (same(t->kind, "IDENT")){
+        advance(p);
 
         if (!at(p, "LEFT_PAREN")){
             Symbol *s = resolve(p, t->lexeme, t->line);
@@ -856,12 +861,12 @@ static const char *parse_primary(Parser *p) {
             }
         }
 
-    } else if(same(t->kind, "LEFT_PAREN")) {
+    } else if(at(p, "LEFT_PAREN")) {
+        expect(p, "LEFT_PAREN");
         type = parse_expr(p);
         expect(p, "RIGHT_PAREN");
     } else{
-        printf("uhhh broken expression error\n");
-        exit(0);
+        syntax_error(p, "an expression");
     }
 
     leave(p, "primary");
