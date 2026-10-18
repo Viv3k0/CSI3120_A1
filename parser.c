@@ -609,12 +609,14 @@ static const char *parse_call(Parser *p, Token *name) {
     (void)p;
     (void)name;
     // TODO("parse_call");
-
     enter(p, "call");
+    char msg[MSG];
 
     Symbol *func = resolve(p, name->lexeme, name->line);
 
     if (!same(func->kind, "func")){
+        snprintf(msg, sizeof(msg), "attempt to call a variable %s", name->lexeme);
+
         printf("attempt to call a non-function identifer\n");
         exit(0);
     }
@@ -626,11 +628,14 @@ static const char *parse_call(Parser *p, Token *name) {
     while (!at(p, "RIGHT_PAREN")){
         const char *arg_type = parse_expr(p);
 
-        if (!same(func->params[seen_args++], arg_type)){
-            printf("Incorrect type passed to function\n");
-            exit(0);
+        if (seen_args < func->nparams && !same(func->params[seen_args], arg_type)){
+            snprintf(msg, sizeof(msg), "parmeter %d of function '%s' expects type %s but got type %s", 
+               seen_args+1, name->lexeme, func->params[seen_args], arg_type);
+            sem_error(p, func->line, msg);
         }
 
+        seen_args++;
+        
         if (!at(p, "RIGHT_PAREN")){ expect(p, "COMMA"); }
     }
 
@@ -638,12 +643,11 @@ static const char *parse_call(Parser *p, Token *name) {
     advance(p);
 
     if (seen_args != func->nparams){
-        printf("missing arguments in function call\n");
-        exit(0);
+        snprintf(msg, sizeof(msg), "Wrong number of arguments passed to function '%s'", name->lexeme);
+        sem_error(p, func->line, msg);
     }
 
     leave(p, "call");
-
     return func->type;
 }
 
@@ -850,14 +854,14 @@ static const char *parse_primary(Parser *p) {
         if (!at(p, "LEFT_PAREN")){
             Symbol *s = resolve(p, t->lexeme, t->line);
             if (s == NULL){
-                printf("NON_EXISTANT IDENTIFER \n");
-                exit(0);
-            }
-            type = s->type;
+                t = NULL;
+            } else {
+                type = s->type;
 
-            if (same(s->kind, "func")){
-                snprintf(msg, sizeof(msg), "Cannot use function as identifier: %s", t->lexeme);
-                sem_error(p, t->line, msg);
+                if (same(s->kind, "func")){
+                    snprintf(msg, sizeof(msg), "Cannot use function as variable: %s", t->lexeme);
+                    sem_error(p, t->line, msg);
+                }
             }
         } else {
             type = parse_call(p, t);
