@@ -98,8 +98,7 @@ int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden)
     (void)hidden;
     // TODO("st_declare");
 
-    //symbol to give back is *previous!!!
-
+    //check if symbol is already declared in current scope
     for (int i = 0; i < st->current->nsymbols; i++){
         if (strcmp(sym->name, st->current->symbols[i]->name) == 0){
             *previous = st->current->symbols[i];
@@ -107,14 +106,14 @@ int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden)
         }
     }
 
+    //check if the symbol hides any outer declaration
     *hidden = st_lookup_from(st->current->parent, sym->name);
 
+    //add symbol to current scope
     if (st->current->cap == st->current->nsymbols){
         st->current->symbols = realloc(st->current->symbols, sizeof(Symbol) * (1 + st->current->nsymbols));
         st->current->cap++;
     }
-
-    // printf("adding: %s \n", sym->name);
 
     st->current->symbols[st->current->nsymbols++] = sym;
 
@@ -130,6 +129,7 @@ Symbol *st_lookup_from(Scope *scope, const char *name) {
     (void)name;
     // TODO("st_lookup_from");
     
+    //go thorugh each scope and try to find the symbol
     while (scope != NULL){
         for (int s = 0; s < scope->nsymbols; s++){
             if (strcmp(scope->symbols[s]->name, name) == 0){
@@ -159,4 +159,14 @@ void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisibl
     (void)hidden;
     (void)nhidden;
     TODO("st_referencing_environment");
+
+    Scope *current = st->current;
+
+    while (current != NULL) {
+        for (int s = 0; s < current->nsymbols; s++){
+            
+        }
+        current = current->parent;
+    }
+
 }
