@@ -427,7 +427,7 @@ static void parse_ident_stmt(Parser *p) {
     (void)p;
     // TODO("parse_ident_stmt");
     enter(p, "ident_stmt");
-
+    char msg[MSG];
     Token *ident = expect(p, "IDENT");
 
     //check for function call
@@ -439,21 +439,22 @@ static void parse_ident_stmt(Parser *p) {
         Symbol *s = resolve(p, ident->lexeme, ident->line);
         const char *t = parse_expr(p);
 
-        if (s == NULL){
-            printf("NON-EXISTANT IDENTIFER \n");
-            exit(0);
-        } else if (same(s->kind, "func")){ 
-            printf("CANT ASSIGN STUFF TO FUNCTION\n");
-            exit(0);
-        } else if (same(s->kind, "const")){
-            printf("CANT ASSIGN STUFF TO CONST\n");
-            exit(0);
+        //resolve warns if identifer is NULL so just take care of non-NULL case
+        if (s != NULL){
+            if (same(s->kind, "func")){ 
+                printf("CANT ASSIGN STUFF TO FUNCTION\n");
+                exit(0);
+            } else if (same(s->kind, "const")){
+                snprintf(msg, sizeof(msg), "attempt to assign value to const: %s", ident->lexeme);
+                sem_error(p, ident->line, msg);
+            }
+            
+            if (!assignable(s->type, t)){
+                snprintf(msg, sizeof(msg), "attempt to assign type %s to identifer '%s' of type %s", t, ident->lexeme, s->type);
+                sem_error(p, ident->line, msg);
+            }
         }
 
-        if (!assignable(s->type, t)){
-            printf("cant aassign typeeee %s to %s \n", t, s->type);
-            exit(0);
-        }
     }
 
     expect(p, "SEMICOLON");
@@ -829,7 +830,7 @@ static const char *parse_primary(Parser *p) {
     enter(p, "primary");
     Token *t = tok(p);
     const char *type = "";
-
+    char msg[MSG];
 
     if (same(t->kind, "INT_LIT")){
         advance(p);
@@ -855,8 +856,8 @@ static const char *parse_primary(Parser *p) {
             type = s->type;
 
             if (same(s->kind, "func")){
-                printf("attempt to use function idetifier in expression\n");
-                exit(0);
+                snprintf(msg, sizeof(msg), "Cannot use function as identifier: %s", t->lexeme);
+                sem_error(p, t->line, msg);
             }
         } else {
             type = parse_call(p, t);
