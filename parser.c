@@ -606,8 +606,43 @@ static const char *parse_call(Parser *p, Token *name) {
      */
     (void)p;
     (void)name;
-    TODO("parse_call");
-    return NULL;
+    // TODO("parse_call");
+
+    enter(p, "call");
+
+    Symbol *func = resolve(p, name->lexeme, name->line);
+
+    if (!same(func->kind, "func")){
+        printf("attempt to call a non-function identifer\n");
+        exit(0);
+    }
+    
+    expect(p, "LEFT_PAREN");
+
+    int seen_args = 0;
+
+    while (!at(p, "RIGHT_PAREN")){
+        const char *arg_type = parse_expr(p);
+
+        if (!same(func->params[seen_args++], arg_type)){
+            printf("Incorrect type passed to function\n");
+            exit(0);
+        }
+
+        if (!at(p, "RIGHT_PAREN")){ expect(p, "COMMA"); }
+    }
+
+    //skip closing )
+    advance(p);
+
+    if (seen_args != func->nparams){
+        printf("missing arguments in function call\n");
+        exit(0);
+    }
+
+    leave(p, "call");
+
+    return func->type;
 }
 
 /* ============================================================================
@@ -802,20 +837,16 @@ static const char *parse_primary(Parser *p) {
     } else if (same(t->kind, "KW_TRUE") || same(t->kind, "KW_FALSE")) {
         type = "bool";
     } else if (same(t->kind, "IDENT")){
-        Symbol *s = resolve(p, t->lexeme, t->line);
 
-        if (same(s->kind, "func")){
-            if (!at(p, "LEFT_PAREN")){
-                printf("expression expected\n");
-                exit(0);
-            }  else if (same(s->type, "void")){
-                printf("expression expected (not void)\n");
-                exit(0);
-            }
-
-            type = parse_call(p, t);
+        if (!at(p, "LEFT_PAREN")){
+           type = resolve(p, t->lexeme, t->line)->type;
         } else {
-            type = s->type;
+            type = parse_call(p, t);
+        }
+
+        if (same(type, "void")){
+            printf("expression expected (not void)\n");
+            exit(0);
         }
 
     } else {
