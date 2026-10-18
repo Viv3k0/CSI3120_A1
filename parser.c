@@ -365,7 +365,6 @@ static void parse_func_decl(Parser *p) {
         if (!at(p, "RIGHT_PAREN")) { expect(p, "COMMA"); }
     }
 
-
     //skip the closing )
     advance(p);
     expect(p, "COLON");
@@ -430,12 +429,12 @@ static void parse_ident_stmt(Parser *p) {
     enter(p, "ident_stmt");
 
     Token *ident = expect(p, "IDENT");
-    expect(p, "ASSIGN_OP");
 
     //check for function call
     if (at(p, "LEFT_PAREN")){
         parse_call(p, ident);
     } else {
+        expect(p, "ASSIGN_OP");
         //check if its possible to assign the given expression to the ident
         Symbol *s = resolve(p, ident->lexeme, ident->line);
 
@@ -733,7 +732,7 @@ static const char *parse_rel_expr(Parser *p) {
         b = parse_add_expr(p);
 
         if (same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP")){
-            if (!same(a, b)){
+            if (!same(a, b) && !(is_numeric(a) && is_numeric(b))){
                 printf("comparing different types\n");
                 exit(0);
             }
@@ -797,7 +796,8 @@ static const char *parse_factor(Parser *p) {
         advance(p);
         t = parse_factor(p);
         if (!same(t, "bool")){
-            return NULL;
+            printf("! expects type bool\n");
+            exit(0);
         }
     } else if (at(p, "SUB_OP")){
         advance(p);
@@ -827,7 +827,8 @@ static const char *parse_primary(Parser *p) {
     enter(p, "primary");
     Token *t = advance(p);
     const char *type;
-    
+
+
     if (same(t->kind, "INT_LIT")){
         type = "int";
     } else if (same(t->kind, "FLOAT_LIT")){
@@ -839,20 +840,28 @@ static const char *parse_primary(Parser *p) {
     } else if (same(t->kind, "IDENT")){
 
         if (!at(p, "LEFT_PAREN")){
-           type = resolve(p, t->lexeme, t->line)->type;
+            Symbol *s = resolve(p, t->lexeme, t->line);
+            type = s->type;
+
+            if (same(s->kind, "func")){
+                printf("attempt to use function idetifier in expression\n");
+                exit(0);
+            }
         } else {
             type = parse_call(p, t);
+
+            if (same(type, "void")){
+                printf("expression expected (not void)\n");
+                exit(0);
+            }
         }
 
-        if (same(type, "void")){
-            printf("expression expected (not void)\n");
-            exit(0);
-        }
-
-    } else {
-        expect(p, "LEFT_PAREN");
+    } else if(same(t->kind, "LEFT_PAREN")) {
         type = parse_expr(p);
         expect(p, "RIGHT_PAREN");
+    } else{
+        printf("uhhh broken expression error\n");
+        exit(0);
     }
 
     leave(p, "primary");
