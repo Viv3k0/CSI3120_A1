@@ -366,7 +366,6 @@ static void parse_func_decl(Parser *p) {
     }
 
 
-
     //skip the closing )
     advance(p);
     expect(p, "COLON");
@@ -389,7 +388,13 @@ static void parse_func_decl(Parser *p) {
         declare(p, symbol_new(params[i]->lexeme, "param", param_types[i], params[i]->line, func_scope, NULL, 0));
     }
 
+    //add fucntion to func stack
+    p->func_stack[p->nfunc++] = s_func; 
+
     parse_block(p, 0);
+
+    //remove function from func stack
+    p->nfunc--; 
     st_close_scope(&p->st);
 
     free(param_types);
@@ -535,6 +540,11 @@ static void parse_return_stmt(Parser *p) {
        ret_type = parse_expr(p);
     } else {
         ret_type = "void";
+    }
+
+    if(!same(p->func_stack[p->nfunc-1]->type, ret_type)){
+        printf("WRONG RETURN TYPE\n");
+        exit(0);
     }
 
     expect(p, "SEMICOLON");
