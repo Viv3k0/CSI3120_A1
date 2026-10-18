@@ -109,10 +109,10 @@ int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden)
     //check if the symbol hides any outer declaration
     *hidden = st_lookup_from(st->current->parent, sym->name);
 
-    //add symbol to current scope
+    //add symbol to current scope (increase the size of the symbol array if needed)
     if (st->current->cap == st->current->nsymbols){
-        st->current->symbols = realloc(st->current->symbols, sizeof(Symbol) * (1 + st->current->nsymbols));
-        st->current->cap++;
+        st->current->symbols = realloc(st->current->symbols, sizeof(Symbol) * st->current->nsymbols * 2 + 1);
+        st->current->cap = st->current->cap * 2 + 1;
     }
 
     st->current->symbols[st->current->nsymbols++] = sym;
@@ -158,13 +158,36 @@ void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisibl
     (void)nvisible;
     (void)hidden;
     (void)nhidden;
-    TODO("st_referencing_environment");
+    // TODO("st_referencing_environment");
 
     Scope *current = st->current;
 
+    *nvisible = 0;
+    *nhidden = 0;
+    *visible = malloc(sizeof(Symbol*));
+    *hidden = malloc(sizeof(Symbol*));
+    
     while (current != NULL) {
         for (int s = 0; s < current->nsymbols; s++){
-            
+            //check if symbol is already decleared in a closer scope
+            int hide = 0;
+
+            for (int i = 0; i < *nvisible; i++){
+                if (strcmp((*visible)[i]->name, current->symbols[s]->name) == 0){
+                    *hidden = realloc(*hidden, sizeof(Symbol*) * (*nhidden + 1));
+                    (*hidden)[*nhidden] = current->symbols[s];
+                    (*nhidden)++;
+                    hide = 1;
+                    break;
+                }
+            }
+
+            //if symbol doesnt get hidden add it to the visible symbols
+            if (!hide){
+                *visible = realloc(*visible, sizeof(Symbol*) * (*nvisible + 1));
+                (*visible)[*nvisible] = current->symbols[s];
+                (*nvisible)++;
+            }
         }
         current = current->parent;
     }
