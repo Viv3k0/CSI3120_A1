@@ -147,6 +147,19 @@ Symbol *st_lookup(SymbolTable *st, const char *name) {
     return st_lookup_from(st->current, name);
 }
 
+//funtion to simplify efficiently adding to the visible/hidden symbol* arrays in st_referencing_environment
+void add_to_symbol_arr(Symbol ***arr, Symbol *item, int *current_size, int *max_size){
+    //realloc if we need more space
+    if (*max_size <=  *current_size){
+        (*arr) = realloc(*arr, sizeof(Symbol*) * (*max_size) * 2 + 1);
+        *max_size = (*max_size) * 2 + 1;
+    }
+
+    //add symbol
+    (*arr)[*current_size] = item;
+    (*current_size)++;
+}
+
 /* -- referencing environment ------------------------------------------------- */
 void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisible,
                                 Symbol ***hidden, int *nhidden) {
@@ -166,6 +179,9 @@ void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisibl
     *nhidden = 0;
     *visible = malloc(sizeof(Symbol*));
     *hidden = malloc(sizeof(Symbol*));
+
+    int max_visbible = 1;
+    int max_hidden = 1;
     
     while (current != NULL) {
         for (int s = 0; s < current->nsymbols; s++){
@@ -174,9 +190,7 @@ void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisibl
 
             for (int i = 0; i < *nvisible; i++){
                 if (strcmp((*visible)[i]->name, current->symbols[s]->name) == 0){
-                    *hidden = realloc(*hidden, sizeof(Symbol*) * (*nhidden + 1));
-                    (*hidden)[*nhidden] = current->symbols[s];
-                    (*nhidden)++;
+                    add_to_symbol_arr(hidden, current->symbols[s], nhidden, &max_hidden);
                     hide = 1;
                     break;
                 }
@@ -184,12 +198,12 @@ void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisibl
 
             //if symbol doesnt get hidden add it to the visible symbols
             if (!hide){
-                *visible = realloc(*visible, sizeof(Symbol*) * (*nvisible + 1));
-                (*visible)[*nvisible] = current->symbols[s];
-                (*nvisible)++;
+                add_to_symbol_arr(visible, current->symbols[s], nvisible, &max_visbible);
             }
         }
         current = current->parent;
     }
 
+    *visible = realloc(*visible, (*nvisible) * sizeof(Symbol*));
+    *hidden = realloc(*hidden, (*nhidden) * sizeof(Symbol*));
 }
