@@ -114,9 +114,10 @@ static void error(Lexer *lx, int line, const char *msg) {
 
 //simple function to format an error message concatanated with some data
 char *format_err(char *err_msg, char *data){
-    char *msg = malloc(sizeof(char) * (strlen(err_msg) + strlen(data)));
+    int len = strlen(err_msg) + strlen(data) - 1;
+    char *msg = malloc(sizeof(char) * len);
     sprintf(msg, err_msg, data);
-    msg[strlen(err_msg) + strlen(data) - 1] = '\0';
+    msg[len - 1] = '\0';
     return msg;
 }
 
@@ -206,6 +207,7 @@ static void lex_identifier(Lexer *lx) {
         char *err_msg = format_err("identifier \'%s\' is longer than 31 characters", lexeme);
 
         error(lx, lx->line, err_msg);
+        free(err_msg);
         free(lexeme); //dont need the lexeme since its illgeal
         return;
     }
@@ -239,8 +241,9 @@ static void lex_number(Lexer *lx) {
                 char *malformed_float = substr(lx->text, start, lx->pos);
                 char *err_msg = format_err("malformed float literal \'%s\' (digit expected after '.')", malformed_float);
                 
-                free(malformed_float);
                 error(lx, lx->line, err_msg);
+                free(malformed_float);
+                free(err_msg);
                 return;
             }
 
@@ -251,8 +254,9 @@ static void lex_number(Lexer *lx) {
             char *illgeal_ident = substr(lx->text, start, lx->pos);
             char *err_msg = format_err("illegal identifier \'%s\' (identifiers cannot start with a digit)", illgeal_ident);
 
-            free(illgeal_ident);
             error(lx, lx->line, err_msg);
+            free(illgeal_ident);
+            free(err_msg);
             return;
         }
         
@@ -290,6 +294,7 @@ static void lex_string(Lexer *lx) {
 
             error(lx, lx->line, err_msg);
             free(unterminated_str);
+            free(err_msg);
             return;
         }
         advance(lx);
@@ -334,6 +339,7 @@ static void lex_operator(Lexer *lx) {
 
         error(lx, lx->line, err_msg);
         free(op); //dont need the character anymore
+        free(err_msg);
     }
 
     advance(lx);

@@ -437,16 +437,18 @@ static void parse_ident_stmt(Parser *p) {
         expect(p, "ASSIGN_OP");
         //check if its possible to assign the given expression to the ident
         Symbol *s = resolve(p, ident->lexeme, ident->line);
+        const char *t = parse_expr(p);
 
-        if (same(s->kind, "func")){ 
+        if (s == NULL){
+            printf("NON-EXISTANT IDENTIFER \n");
+            exit(0);
+        } else if (same(s->kind, "func")){ 
             printf("CANT ASSIGN STUFF TO FUNCTION\n");
             exit(0);
         } else if (same(s->kind, "const")){
             printf("CANT ASSIGN STUFF TO CONST\n");
             exit(0);
         }
-
-        const char *t = parse_expr(p);
 
         if (!assignable(s->type, t)){
             printf("cant aassign typeeee %s to %s \n", t, s->type);
@@ -846,6 +848,10 @@ static const char *parse_primary(Parser *p) {
 
         if (!at(p, "LEFT_PAREN")){
             Symbol *s = resolve(p, t->lexeme, t->line);
+            if (s == NULL){
+                printf("NON_EXISTANT IDENTIFER \n");
+                exit(0);
+            }
             type = s->type;
 
             if (same(s->kind, "func")){
