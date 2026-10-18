@@ -471,6 +471,11 @@ static void check_condition(Parser *p, const char *t, int line, const char *what
 /* <if_stmt>   -> if ( <expr> ) <block> <else_part>
  * <else_part> -> else <block> | epsilon */
 static void parse_if_stmt(Parser *p) {
+    /* TODO: Use check_condition(...) on the type of the condition. Each block opens a new scope.
+     */
+    (void)p;
+    (void)check_condition;
+
     enter(p, "if_stmt");
     
     expect(p, "KW_IF");
@@ -482,7 +487,12 @@ static void parse_if_stmt(Parser *p) {
     
     expect(p, "RIGHT_PAREN");
 
-    //nah
+    parse_block(p, 1);
+
+    if (at(p, "KW_ELSE")){
+        expect(p, "KW_ELSE");
+        parse_block(p, 1);
+    }
     
     leave(p, "if_stmt");
 }
@@ -528,9 +538,7 @@ static void parse_return_stmt(Parser *p) {
      */
     (void)p;
     // TODO("parse_return_stmt");
-    
-    //how to check return type matches function type???
-    
+        
     enter(p, "return_stmt");
     expect(p, "KW_RETURN");
 
@@ -543,7 +551,7 @@ static void parse_return_stmt(Parser *p) {
     }
 
     if(!same(p->func_stack[p->nfunc-1]->type, ret_type)){
-        printf("WRONG RETURN TYPE\n");
+        printf("WRONG RETURN TYPE got: %s, expected: %s\n", ret_type, p->func_stack[p->nfunc-1]->type);
         exit(0);
     }
 
@@ -797,12 +805,12 @@ static const char *parse_primary(Parser *p) {
         Symbol *s = resolve(p, t->lexeme, t->line);
 
         if (same(s->kind, "func")){
-            if (!at(p, "RIGHT_PAREN")){
+            if (!at(p, "LEFT_PAREN")){
                 printf("expression expected\n");
-                return NULL;
+                exit(0);
             }  else if (same(s->type, "void")){
                 printf("expression expected (not void)\n");
-                return NULL;
+                exit(0);
             }
 
             type = parse_call(p, t);
