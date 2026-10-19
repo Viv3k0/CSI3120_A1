@@ -442,10 +442,10 @@ static void parse_ident_stmt(Parser *p) {
         //resolve warns if identifer is NULL so just take care of non-NULL case
         if (s != NULL){
             if (same(s->kind, "func")){ 
-                printf("CANT ASSIGN STUFF TO FUNCTION\n");
-                exit(0);
+                snprintf(msg, sizeof(msg), "attempt to assign value to function '%s'", ident->lexeme);
+                sem_error(p, ident->line, msg);
             } else if (same(s->kind, "const")){
-                snprintf(msg, sizeof(msg), "attempt to assign value to const: %s", ident->lexeme);
+                snprintf(msg, sizeof(msg), "attempt to assign value to const '%s'", ident->lexeme);
                 sem_error(p, ident->line, msg);
             }
             
@@ -542,7 +542,8 @@ static void parse_return_stmt(Parser *p) {
     // TODO("parse_return_stmt");
         
     enter(p, "return_stmt");
-    expect(p, "KW_RETURN");
+    char msg[MSG];
+    Token *ret = expect(p, "KW_RETURN");
 
     const char *ret_type;
 
@@ -552,9 +553,13 @@ static void parse_return_stmt(Parser *p) {
         ret_type = "void";
     }
 
-    if(!same(p->func_stack[p->nfunc-1]->type, ret_type)){
-        printf("WRONG RETURN TYPE got: %s, expected: %s\n", ret_type, p->func_stack[p->nfunc-1]->type);
-        exit(0);
+    if(p->nfunc > 0 && !same(p->func_stack[p->nfunc-1]->type, ret_type)){
+        snprintf(msg, sizeof(msg), "wrong return type to function '%s', expected %s but got %s", 
+            p->func_stack[p->nfunc-1]->name, p->func_stack[p->nfunc-1]->type, ret_type);
+        sem_error(p, ret->line, msg);
+    } else if (p->nfunc <= 0){
+        snprintf(msg, sizeof(msg), "Can't return outside of function scope");
+        sem_error(p, ret->line, msg);
     }
 
     expect(p, "SEMICOLON");
@@ -615,10 +620,8 @@ static const char *parse_call(Parser *p, Token *name) {
     Symbol *func = resolve(p, name->lexeme, name->line);
 
     if (!same(func->kind, "func")){
-        snprintf(msg, sizeof(msg), "attempt to call a variable %s", name->lexeme);
-
-        printf("attempt to call a non-function identifer\n");
-        exit(0);
+        snprintf(msg, sizeof(msg), "attempt to call variable '%s'", name->lexeme);
+        sem_error(p, func->line, msg);
     }
     
     expect(p, "LEFT_PAREN");
@@ -642,7 +645,7 @@ static const char *parse_call(Parser *p, Token *name) {
     //skip closing )
     advance(p);
 
-    if (seen_args != func->nparams){
+    if (seen_args != func->nparams && same(func->kind, "func")){
         snprintf(msg, sizeof(msg), "Wrong number of arguments passed to function '%s'", name->lexeme);
         sem_error(p, func->line, msg);
     }
@@ -859,7 +862,7 @@ static const char *parse_primary(Parser *p) {
                 type = s->type;
 
                 if (same(s->kind, "func")){
-                    snprintf(msg, sizeof(msg), "Cannot use function as variable: %s", t->lexeme);
+                    snprintf(msg, sizeof(msg), "Can't use function '%s' as variable", t->lexeme);
                     sem_error(p, t->line, msg);
                 }
             }
