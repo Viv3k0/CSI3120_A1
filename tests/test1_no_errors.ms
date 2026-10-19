@@ -1,5 +1,5 @@
 // no semantic/syntax errors 
-program prime {
+program Prime {
 
     /* find the square root of an integer using binary search */
     func sqrt(n : int) : int {
@@ -9,7 +9,7 @@ program prime {
         while (l <= u){
             var m : int = (l + u) / 2;
 
-            if (m * m == n){
+            if (m * m >= n && (m-1) * (m-1) < n){
                 return m;
             }
 
@@ -26,7 +26,7 @@ program prime {
     func isPrime(n : int) : bool {
         if (n == 1){ return false; }
         if (n == 2){ return true; }
-        
+
         var i : int = 2;
         const max : int = sqrt(n);
         

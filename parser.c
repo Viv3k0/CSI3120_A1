@@ -587,7 +587,7 @@ static const char *parse_call(Parser *p, Token *name) {
     Symbol *func = resolve(p, name->lexeme, name->line);
 
     //check if the found symbol is a function
-    if (!same(func->kind, "func")){
+    if (func != NULL && !same(func->kind, "func")){
         snprintf(msg, sizeof(msg), "attempt to call variable '%s'", name->lexeme);
         sem_error(p, func->line, msg);
     }
@@ -601,7 +601,7 @@ static const char *parse_call(Parser *p, Token *name) {
         const char *arg_type = parse_expr(p);
 
         //check if argument type matches parameter type
-        if (seen_args < func->nparams && !assignable(func->params[seen_args], arg_type)){
+        if (func != NULL && arg_type != NULL && seen_args < func->nparams && !assignable(func->params[seen_args], arg_type)){
             snprintf(msg, sizeof(msg), "parmeter %d of function '%s' expects type %s but got type %s", 
                seen_args+1, name->lexeme, func->params[seen_args], arg_type);
             sem_error(p, func->line, msg);
@@ -616,13 +616,13 @@ static const char *parse_call(Parser *p, Token *name) {
     advance(p);
 
     //check if right number of arguments were passed
-    if (seen_args != func->nparams && same(func->kind, "func")){
+    if (func != NULL && seen_args != func->nparams && same(func->kind, "func")){
         snprintf(msg, sizeof(msg), "Wrong number of arguments passed to function '%s'", name->lexeme);
         sem_error(p, func->line, msg);
     }
 
     leave(p, "call");
-    return same(func->kind, "func") ? func->type : NULL;
+    return func != NULL && same(func->kind, "func") ? func->type : NULL;
 }
 
 /* ============================================================================
@@ -696,6 +696,7 @@ static const char *parse_rel_expr(Parser *p) {
     if(at(p, "EQ_OP") || at(p, "NEQ_OP") || at(p, "LT_OP") || at(p, "GT_OP") || at(p, "LE_OP") || at(p, "GE_OP" )){
         Token *op = advance(p);
         b = parse_add_expr(p);
+        
 
         if (same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP")){
             //check if types are the same or both are numeric for == and != 
@@ -806,7 +807,7 @@ static const char *parse_primary(Parser *p) {
         if (!at(p, "LEFT_PAREN")){
             Symbol *s = resolve(p, t->lexeme, t->line);
             if (s == NULL){
-                t = NULL;
+                type = NULL;
             } else {
                 type = s->type;
                 //check if function is being usaed as a variable
