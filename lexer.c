@@ -303,6 +303,7 @@ static void lex_operator(Lexer *lx) {
     if (one_char_op != NULL){
         add_token(lx, one_char_op, op, lx->line);
     } else {
+        //error sinee operator is illgeal
         char *err_msg = format_err("illegal character \'%s\'", op);
 
         error(lx, lx->line, err_msg);

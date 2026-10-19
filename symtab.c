@@ -87,16 +87,9 @@ Symbol *st_lookup_from(Scope *scope, const char *name);
 
 /* -- declarations ------------------------------------------------------------ */
 int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden) {
-    /* TODO: Bind the symbol's name in the CURRENT scope.
+    /*Binds the symbol's name in the CURRENT scope.
      *       - if the name is already declared in this same scope: failure, give back the previous symbol;
-     *       - otherwise add it and give back the outer declaration (found in a static ancestor)
-     *         that the new one hides, or nothing.
-     */
-    (void)st;
-    (void)sym;
-    (void)previous;
-    (void)hidden;
-    // TODO("st_declare");
+     *       - otherwise add it and give back the outer declaration (found in a static ancestor) */
 
     //check if symbol is already declared in current scope
     for (int i = 0; i < st->current->nsymbols; i++){
@@ -122,12 +115,8 @@ int st_declare(SymbolTable *st, Symbol *sym, Symbol **previous, Symbol **hidden)
 
 /* -- lookup (static scoping) ------------------------------------------------- */
 Symbol *st_lookup_from(Scope *scope, const char *name) {
-    /* TODO: STATIC scoping: search the given scope, then its static parent, then the static
-     *       ancestors, up to the global scope. Return the symbol found, or nothing.
-     */
-    (void)scope;
-    (void)name;
-    // TODO("st_lookup_from");
+    /*STATIC scoping: search the given scope, then its static parent, then the static
+    *ancestors, up to the global scope. Returns the symbol found, or nothing. */
     
     //go thorugh each scope and try to find the symbol
     while (scope != NULL){
@@ -163,15 +152,9 @@ void add_to_symbol_arr(Symbol ***arr, Symbol *item, int *current_size, int *max_
 /* -- referencing environment ------------------------------------------------- */
 void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisible,
                                 Symbol ***hidden, int *nhidden) {
-    /* TODO: Visible and hidden symbols, innermost scope first, in declaration order inside each
+    /* finds visible and hidden symbols, innermost scope first, in declaration order inside each
      *       scope. A symbol is hidden when a scope closer to the current one declares the same name.
      */
-    (void)st;
-    (void)visible;
-    (void)nvisible;
-    (void)hidden;
-    (void)nhidden;
-    // TODO("st_referencing_environment");
 
     Scope *current = st->current;
 
@@ -183,6 +166,7 @@ void st_referencing_environment(SymbolTable *st, Symbol ***visible, int *nvisibl
     int max_visbible = 1;
     int max_hidden = 1;
     
+    //loop over all scopes
     while (current != NULL) {
         for (int s = 0; s < current->nsymbols; s++){
             //check if symbol is already decleared in a closer scope
