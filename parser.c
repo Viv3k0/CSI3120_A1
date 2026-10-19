@@ -270,7 +270,6 @@ static void parse_var_decl(Parser *p) {
     const char *typ = parse_type(p);
     if (at(p, "ASSIGN_OP")) {
         advance(p);
-        Token *t = tok(p);
         const char *etype = parse_expr(p);      /* initializer is evaluated BEFORE the name is bound */
         if (!assignable(typ, etype)) {
             snprintf(msg, sizeof msg, "type mismatch: cannot initialize '%s' (%s) with a %s value",
@@ -285,10 +284,7 @@ static void parse_var_decl(Parser *p) {
 
 /* <const_decl> -> const IDENT : <type> = <expr> ; */
 static void parse_const_decl(Parser *p) {
-    /* TODO: Like parse_var_decl, but the initializer is mandatory and the symbol's kind is "const".
-     */
-    (void)p;
-    // TODO("parse_const_decl");
+    //parse constant variable declaration
 
     char msg[MSG];
     enter(p, "const_decl");
@@ -300,7 +296,8 @@ static void parse_const_decl(Parser *p) {
     expect(p, "ASSIGN_OP");
     
     const char *found_type = parse_expr(p); //check if found type matches the declared type
-    
+
+    //check if we can assign the extression to the variable type
     if (!assignable(found_type, assigned_type)){
         snprintf(msg, sizeof(msg), "type mismatch: cannot initialize '%s' (%s) with a %s value",
                 name->lexeme, assigned_type, found_type);
@@ -315,14 +312,9 @@ static void parse_const_decl(Parser *p) {
 
 /* <param> -> IDENT : <type>   (the name, line and type are returned through pointers) */
 static void parse_param(Parser *p, Token **name, const char **type) {
-    /* TODO: <param> -> IDENT : <type>. Give back the name, the line and the type.
-     */
-    (void)p;
-    (void)name;
-    (void)type;
-    // TODO("parse_param");
-
+    //return param and type through pointer name 
     enter(p, "param");
+
     *name = expect(p, "IDENT");
     expect(p, "COLON");
     *type = parse_type(p);
@@ -335,14 +327,11 @@ static void parse_param(Parser *p, Token **name, const char **type) {
  * <param_list> -> <param> | <param> , <param_list>
  * <ret_type>   -> <type> | void */
 static void parse_func_decl(Parser *p) {
-    /* TODO: Parse the header, then: (1) declare the function name in the ENCLOSING scope (so it can
+    /* Parse the header, then: (1) declare the function name in the ENCLOSING scope (so it can
      *       call itself), (2) open a scope named after the function, (3) declare the parameters there
      *       (kind "param"), (4) push the function on the function stack, parse the body WITHOUT a new
      *       scope, pop, and close the scope.
      */
-    (void)p;
-    (void)parse_param;
-    // TODO("parse_func_decl");
 
     enter(p, "func_decl");
 
@@ -351,6 +340,7 @@ static void parse_func_decl(Parser *p) {
     expect(p, "LEFT_PAREN");
     int num_params = 0;
 
+    //store parmeters and types in arrays for function declartion
     Token **params = malloc(sizeof(char*));
     const char **param_types = malloc(sizeof(char*));
 
@@ -420,12 +410,11 @@ static void parse_stmt(Parser *p) {
 /* <ident_stmt> -> IDENT <ident_tail> ;
  * <ident_tail> -> = <expr> | ( <args> ) */
 static void parse_ident_stmt(Parser *p) {
-    /* TODO: Assignment or call statement (left-factored on IDENT).
+    /* Assignment or call statement (left-factored on IDENT).
      *       Assignment: resolve the name; report an error if it is a const or a func, or if the type
      *       of the expression is not assignable to the type of the variable.
      */
-    (void)p;
-    // TODO("parse_ident_stmt");
+
     enter(p, "ident_stmt");
     char msg[MSG];
     Token *ident = expect(p, "IDENT");
@@ -441,6 +430,7 @@ static void parse_ident_stmt(Parser *p) {
 
         //resolve warns if identifer is NULL so just take care of non-NULL case
         if (s != NULL){
+            // can't assign to functions or const variables
             if (same(s->kind, "func")){ 
                 snprintf(msg, sizeof(msg), "attempt to assign value to function '%s'", ident->lexeme);
                 sem_error(p, ident->line, msg);
@@ -449,6 +439,7 @@ static void parse_ident_stmt(Parser *p) {
                 sem_error(p, ident->line, msg);
             }
             
+            //check if it's possible to assign the expression's type to the identifier's type
             if (!assignable(s->type, t)){
                 snprintf(msg, sizeof(msg), "attempt to assign type %s to identifer '%s' of type %s", t, ident->lexeme, s->type);
                 sem_error(p, ident->line, msg);
@@ -473,24 +464,22 @@ static void check_condition(Parser *p, const char *t, int line, const char *what
 /* <if_stmt>   -> if ( <expr> ) <block> <else_part>
  * <else_part> -> else <block> | epsilon */
 static void parse_if_stmt(Parser *p) {
-    /* TODO: Use check_condition(...) on the type of the condition. Each block opens a new scope.
-     */
-    (void)p;
-    (void)check_condition;
-
     enter(p, "if_stmt");
     
     expect(p, "KW_IF");
     expect(p, "LEFT_PAREN");
     
+    //check if condition is bool
     Token *cond = tok(p);
     const char *t = parse_expr(p);
     check_condition(p, t, cond->line, cond->lexeme);
     
     expect(p, "RIGHT_PAREN");
 
+    //parse main if block 
     parse_block(p, 1);
 
+    //parse else block 
     if (at(p, "KW_ELSE")){
         expect(p, "KW_ELSE");
         parse_block(p, 1);
@@ -501,20 +490,17 @@ static void parse_if_stmt(Parser *p) {
 
 /* <while_stmt> -> while ( <expr> ) <block> */
 static void parse_while_stmt(Parser *p) {
-    /* TODO: Use check_condition(...) on the type of the condition. The body opens a new scope.
-     */
-    (void)p;
-    // TODO("parse_while_stmt");
-
     enter(p, "while_stmt");
 
     expect(p, "KW_WHILE");
     expect(p, "LEFT_PAREN");
     
+    //check while condition is a bool
     Token *cond = tok(p);
     const char *t = parse_expr(p);
     check_condition(p, t, cond->line, cond->lexeme);
 
+    //parse while block
     expect(p, "RIGHT_PAREN");
     parse_block(p, 1);
 
@@ -535,29 +521,27 @@ static void parse_print_stmt(Parser *p) {
 /* <return_stmt> -> return <ret_val> ;
  * <ret_val>     -> <expr> | epsilon */
 static void parse_return_stmt(Parser *p) {
-    /* TODO: Check: return outside a function; a void function returning a value; a non-void
-     *       function returning nothing; a returned value of the wrong type.
-     */
-    (void)p;
-    // TODO("parse_return_stmt");
-        
     enter(p, "return_stmt");
     char msg[MSG];
     Token *ret = expect(p, "KW_RETURN");
 
     const char *ret_type;
 
+    //get the return type
     if (!at(p, "SEMICOLON")){
        ret_type = parse_expr(p);
     } else {
         ret_type = "void";
     }
 
+    //check if in function scope and if return type mathces function type
     if(p->nfunc > 0 && !same(p->func_stack[p->nfunc-1]->type, ret_type)){
         snprintf(msg, sizeof(msg), "wrong return type to function '%s', expected %s but got %s", 
             p->func_stack[p->nfunc-1]->name, p->func_stack[p->nfunc-1]->type, ret_type);
         sem_error(p, ret->line, msg);
-    } else if (p->nfunc <= 0){
+
+        //error, return is not allowed outside of a function scope
+    } else if (p->nfunc <= 0){ 
         snprintf(msg, sizeof(msg), "Can't return outside of function scope");
         sem_error(p, ret->line, msg);
     }
@@ -607,18 +591,17 @@ static void parse_env_stmt(Parser *p) {
  * <args> -> <arg_list> | epsilon
  * <arg_list> -> <expr> | <expr> , <arg_list> */
 static const char *parse_call(Parser *p, Token *name) {
-    /* TODO: Resolve the name, parse the argument list, then check that the name is a function,
+    /* Resolve the name, parse the argument list, then check that the name is a function,
      *       the number of arguments and the type of each argument. Return the function's return
      *       type (or the unknown type).
      */
-    (void)p;
-    (void)name;
-    // TODO("parse_call");
+
     enter(p, "call");
     char msg[MSG];
 
     Symbol *func = resolve(p, name->lexeme, name->line);
 
+    //check if the found symbol is a function
     if (!same(func->kind, "func")){
         snprintf(msg, sizeof(msg), "attempt to call variable '%s'", name->lexeme);
         sem_error(p, func->line, msg);
@@ -628,9 +611,11 @@ static const char *parse_call(Parser *p, Token *name) {
 
     int seen_args = 0;
 
+    //parse the arguments
     while (!at(p, "RIGHT_PAREN")){
         const char *arg_type = parse_expr(p);
 
+        //check if argument type matches parameter type
         if (seen_args < func->nparams && !assignable(func->params[seen_args], arg_type)){
             snprintf(msg, sizeof(msg), "parmeter %d of function '%s' expects type %s but got type %s", 
                seen_args+1, name->lexeme, func->params[seen_args], arg_type);
@@ -645,6 +630,7 @@ static const char *parse_call(Parser *p, Token *name) {
     //skip closing )
     advance(p);
 
+    //check if right number of arguments were passed
     if (seen_args != func->nparams && same(func->kind, "func")){
         snprintf(msg, sizeof(msg), "Wrong number of arguments passed to function '%s'", name->lexeme);
         sem_error(p, func->line, msg);
@@ -684,16 +670,10 @@ static const char *arith(Parser *p, const char *a, const char *b, Token *op) {
 
 /* <expr> -> <and_expr> { || <and_expr> } */
 static const char *parse_expr(Parser *p) {
-    /* TODO: EBNF iteration, like parse_add_expr. Use logical(...) for the type.
-     */
-    (void)p;
-    (void)parse_and_expr;
-    (void)logical;
-    // TODO("parse_expr");
-
     enter(p, "expr");
     const char *r = parse_and_expr(p);
 
+    //keep parsing the || <and_expr>
     while (at(p, "OR_OP")){
         Token *op = advance(p);
         r = logical(p, r, parse_and_expr(p), op);
@@ -705,14 +685,10 @@ static const char *parse_expr(Parser *p) {
 
 /* <and_expr> -> <rel_expr> { && <rel_expr> } */
 static const char *parse_and_expr(Parser *p) {
-    /* TODO: EBNF iteration, like parse_add_expr. Use logical(...) for the type.
-     */
-    (void)p;
-    (void)parse_rel_expr;
-
     enter(p, "and_expr");
     const char *r = parse_rel_expr(p);
 
+    //keep parsing && <rel_expr>
     while(at(p, "AND_OP")){
         Token *op = advance(p);
         r = logical(p, r, parse_rel_expr(p), op);
@@ -724,18 +700,17 @@ static const char *parse_and_expr(Parser *p) {
 
 /* <rel_expr> -> <add_expr> [ <rel_op> <add_expr> ] */
 static const char *parse_rel_expr(Parser *p) {
-    /* TODO: At most ONE relational operator (non-associative). The result type is bool.
+    /* At most ONE relational operator (non-associative). The result type is bool.
      *       == and != accept two values of the same type (or two numbers);
      *       < <= > >= accept numbers only.
      */
-    (void)p;
-    (void)parse_add_expr;
 
     enter(p, "rel_expr");
     char msg[MSG];
 
     const char *a = parse_add_expr(p);
     const char *b;
+    const char *res = a;
 
     //check for relational opeater
     if(at(p, "EQ_OP") || at(p, "NEQ_OP") || at(p, "LT_OP") || at(p, "GT_OP") || at(p, "LE_OP") || at(p, "GE_OP" )){
@@ -743,22 +718,28 @@ static const char *parse_rel_expr(Parser *p) {
         b = parse_add_expr(p);
 
         if (same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP")){
+            //check if types are the same or both are numeric for == and != 
             if (!same(a, b) && !(is_numeric(a) && is_numeric(b))){
                 snprintf(msg, sizeof(msg), "Can't use '%s' on types %s and %s", op->lexeme, a, b);
                 sem_error(p, op->line, msg);
+                res = NULL;
+            } else {
+                res = "bool";
             }
         } else {
+            //for the comparison operaters check if types are numeric
             if (!(is_numeric(a) && is_numeric(b))){
                 snprintf(msg, sizeof(msg), "Can't use '%s' on types %s and %s", op->lexeme, a, b);
                 sem_error(p, op->line, msg);
+                res = NULL;
+            } else {
+                res = "bool";
             }
         }
-
-        a = "bool";
     } 
 
     leave(p, "rel_expr");
-    return a;
+    return res;
 }
 
 /* <add_expr> -> <term> { ( + | - ) <term> } */
