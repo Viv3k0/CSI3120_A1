@@ -327,14 +327,9 @@ static void parse_param(Parser *p, Token **name, const char **type) {
  * <param_list> -> <param> | <param> , <param_list>
  * <ret_type>   -> <type> | void */
 static void parse_func_decl(Parser *p) {
-    /* Parse the header, then: (1) declare the function name in the ENCLOSING scope (so it can
-     *       call itself), (2) open a scope named after the function, (3) declare the parameters there
-     *       (kind "param"), (4) push the function on the function stack, parse the body WITHOUT a new
-     *       scope, pop, and close the scope.
-     */
-
     enter(p, "func_decl");
 
+    //[arse fuction header
     expect(p, "KW_FUNC");
     Token *func_name = expect(p, "IDENT");
     expect(p, "LEFT_PAREN");
@@ -410,11 +405,6 @@ static void parse_stmt(Parser *p) {
 /* <ident_stmt> -> IDENT <ident_tail> ;
  * <ident_tail> -> = <expr> | ( <args> ) */
 static void parse_ident_stmt(Parser *p) {
-    /* Assignment or call statement (left-factored on IDENT).
-     *       Assignment: resolve the name; report an error if it is a const or a func, or if the type
-     *       of the expression is not assignable to the type of the variable.
-     */
-
     enter(p, "ident_stmt");
     char msg[MSG];
     Token *ident = expect(p, "IDENT");
@@ -591,11 +581,6 @@ static void parse_env_stmt(Parser *p) {
  * <args> -> <arg_list> | epsilon
  * <arg_list> -> <expr> | <expr> , <arg_list> */
 static const char *parse_call(Parser *p, Token *name) {
-    /* Resolve the name, parse the argument list, then check that the name is a function,
-     *       the number of arguments and the type of each argument. Return the function's return
-     *       type (or the unknown type).
-     */
-
     enter(p, "call");
     char msg[MSG];
 
@@ -700,11 +685,6 @@ static const char *parse_and_expr(Parser *p) {
 
 /* <rel_expr> -> <add_expr> [ <rel_op> <add_expr> ] */
 static const char *parse_rel_expr(Parser *p) {
-    /* At most ONE relational operator (non-associative). The result type is bool.
-     *       == and != accept two values of the same type (or two numbers);
-     *       < <= > >= accept numbers only.
-     */
-
     enter(p, "rel_expr");
     char msg[MSG];
 
@@ -756,14 +736,10 @@ static const char *parse_add_expr(Parser *p) {
 
 /* <term> -> <factor> { ( * | / | % ) <factor> } */
 static const char *parse_term(Parser *p) {
-    /* TODO: EBNF iteration, like parse_add_expr. Use arith(...) for the type.
-     */
-    (void)p;
-    (void)parse_factor;
-
     enter(p, "term");
     const char *t = parse_factor(p);
 
+    //parse operaters and factors
     while (at(p, "MULT_OP") || at(p, "DIV_OP") || at(p, "MOD_OP")){
         Token *op = advance(p);
         t = arith(p, t, parse_factor(p), op);
@@ -775,19 +751,14 @@ static const char *parse_term(Parser *p) {
 
 /* <factor> -> ! <factor> | - <factor> | <primary> */
 static const char *parse_factor(Parser *p) {
-    /* TODO: '!' needs a bool operand, unary '-' a numeric one. Return the type.
-     */
-    (void)p;
-    (void)parse_primary;
-    // TODO("parse_factor");
-
     enter(p, "factor");
     char msg[MSG];
     const char *t;
-
+    
     if (at(p, "NOT_OP")){
         Token *op = advance(p);
         t = parse_factor(p);
+        //not operator can only be used on a bool
         if (!same(t, "bool")){
             snprintf(msg, sizeof(msg), "Can't use '!' on type %s", t);
             sem_error(p, op->line, msg);
@@ -795,6 +766,7 @@ static const char *parse_factor(Parser *p) {
     } else if (at(p, "SUB_OP")){
         Token *op = advance(p);
         t = parse_factor(p);
+         //subtraction operator can only be used on numbers
         if (!is_numeric(t)){
             snprintf(msg, sizeof(msg), "Can't use '-' on type %s", t);
             sem_error(p, op->line, msg);
@@ -810,14 +782,6 @@ static const char *parse_factor(Parser *p) {
 /* <primary> -> INT_LIT | FLOAT_LIT | STRING_LIT | true | false
  *            | IDENT | IDENT ( <args> ) | ( <expr> ) */
 static const char *parse_primary(Parser *p) {
-    /* TODO: Literals, true/false, IDENT (resolve it: it must not be a func), IDENT ( <args> )
-     *       (a call; a void function cannot be used in an expression), and ( <expr> ).
-     *       Anything else is a syntax error: "an expression" expected. Return the type.
-     */
-    (void)p;
-    (void)parse_call;
-    (void)resolve;
-    // TODO("parse_primary");
     enter(p, "primary");
     Token *t = tok(p);
     const char *type = "";
@@ -838,21 +802,24 @@ static const char *parse_primary(Parser *p) {
     } else if (same(t->kind, "IDENT")){
         advance(p);
 
+        //check for function call or variable
         if (!at(p, "LEFT_PAREN")){
             Symbol *s = resolve(p, t->lexeme, t->line);
             if (s == NULL){
                 t = NULL;
             } else {
                 type = s->type;
-
+                //check if function is being usaed as a variable
                 if (same(s->kind, "func")){
                     snprintf(msg, sizeof(msg), "Can't use function '%s' as variable", t->lexeme);
                     sem_error(p, t->line, msg);
                 }
             }
         } else {
+            //parse the function call and get its return type
             type = parse_call(p, t);
 
+            //return type can't be void in expressions
             if (type != NULL && same(type, "void")){
                 snprintf(msg, sizeof(msg), "void function '%s' cannot be used in expression", t->lexeme);
                 sem_error(p, t->line, msg);
@@ -860,6 +827,7 @@ static const char *parse_primary(Parser *p) {
         }
 
     } else if(at(p, "LEFT_PAREN")) {
+        //parse (<expr>)
         expect(p, "LEFT_PAREN");
         type = parse_expr(p);
         expect(p, "RIGHT_PAREN");
