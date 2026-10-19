@@ -1,27 +1,20 @@
-CSI3120A - Assignment 1 (MiniScope) - C starter kit
+CSI3120A - Assignment 1
 
-  miniscope.c                 driver (complete)
-  lexer.h, symtab.h, parser.h interfaces (complete - do not change them)
-  lexer.c                     Part A1   - complete the functions marked TODO
-  parser.c                    Parts B1/B2 - complete the functions marked TODO
-  symtab.c                    Part B2   - complete the functions marked TODO
-  todo.h                      the TODO(...) macro used by the unfinished functions
-  Makefile                    build with: make   (Windows/MinGW: mingw32-make)
-  tests/                      test programs (see Section 7 of the handout)
-  expected/                   expected outputs for t0-t4 (t5, t6 and q7 are not provided)
+names and student numbers: Abishan Shanmuhesan (300430579) & Vivek Singathi (300435572)
 
-Build and run, from this folder:
-  make
-  ./miniscope tests/t1_tokens.ms --tokens
-  ./miniscope tests/t3_valid.ms
-  ./miniscope tests/t0_trace.ms --trace
+Compile instructions (same as starter code compilation):
+  First run:
+    make ./miniscope
+  to compile the program
 
-Compare with the expected output:
-  ./miniscope tests/t3_valid.ms | diff -w - expected/t3_valid.out
+Then run from this folder:
+./miniscope path/to/miniscope/file
 
-Check your memory management:
-  valgrind --leak-check=full ./miniscope tests/t5_scopes.ms
+use --tokens as follows to output tokens:
+./miniscope path/to/miniscope/file --tokens
 
-A function that is not written yet prints "TODO: ... is not implemented yet" and exits with code 3.
-Syntax errors are reported with setjmp/longjmp (see parser.h): parse_program() returns 0 at the
-first syntax error, and parser_free() releases the scopes that were left open.
+use --trace as follows to output trace:
+./miniscope path/to/miniscope/file --trace
+
+The test files and outputs that we made are stored here in this folder 
+(test1_valid.ms, test2_errors.ms, test1_valid.out, test2_errors.out)
