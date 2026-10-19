@@ -123,22 +123,11 @@ char *format_err(char *err_msg, char *data){
 
 /* -- token recognizers ------------------------------------------------------ */
 static void skip_blanks_and_comments(Lexer *lx) {
-    /* TODO: Skip white space, line comments and block comments.
-     *       - blanks, tabs and newlines are skipped (advance() keeps the line counter up to date);
-     *       - a line comment starts with two slashes and ends at the end of the line;
-     *       - a block comment starts with a slash followed by a star and ends at the next star
-     *         followed by a slash; if the file ends first, report
-     *         "unclosed block comment (opened here)" at the line where it was opened.
-     */
-    (void)lx;
-    (void)peek;
-    (void)advance;
-    (void)at_end;
-    (void)error;    
+    //Skip white space, line comments and block comments
     char current = peek(lx, 0);
 
     while (!at_end(lx)){
-
+        //skip over newline, tab and other invisible characters
         if (current <= 32 || current == '\n' || current == '\t'){
             advance(lx);
         } else if (current == '/' && peek(lx, 1) == '/'){
@@ -174,22 +163,12 @@ static void skip_blanks_and_comments(Lexer *lx) {
 }
 
 static void lex_identifier(Lexer *lx) {
-    /* TODO: Identifier or reserved word: (letter | _) { letter | digit | _ }
-     *       - collect the longest identifier-shaped lexeme;
-     *       - if it is a reserved word, add the reserved-word token;
-     *       - else if it is longer than MAX_IDENT_LEN characters, report an error and add nothing;
-     *       - else add an IDENT token.
-     */
-    (void)lx;
-    (void)substr;
-    (void)lookup;
-    (void)is_ident_char;
-    (void)add_token;
-    (void)RESERVED_WORDS;
+    // lex identifier or reserved word: (letter | _) { letter | digit | _ }
 
     char curr = peek(lx, 0);
     int start = lx->pos;
 
+    //extract the lexeme
     while(!at_end(lx) && is_ident_char(curr)){
         advance(lx);        
         curr = peek(lx, 0);
@@ -198,11 +177,13 @@ static void lex_identifier(Lexer *lx) {
     char* lexeme = substr(lx->text, start, lx->pos);
     const char *word = lookup(RESERVED_WORDS, lexeme);
 
+    //check for reserved word
     if(word != NULL){
         add_token(lx, word, lexeme, lx->line);
         return;
     }
     
+    //error if the identifier is too long
     if(strlen(lexeme) > MAX_IDENT_LEN){
         char *err_msg = format_err("identifier \'%s\' is longer than 31 characters", lexeme);
 
@@ -216,20 +197,14 @@ static void lex_identifier(Lexer *lx) {
 }
 
 static void lex_number(Lexer *lx) {
-    /* TODO: INT_LIT: digit {digit}     FLOAT_LIT: digit {digit} . digit {digit}
-     *       - '12.' (no digit after the point) -> error "malformed float literal";
-     *       - a number immediately followed by a letter or '_' (e.g. 2ndPlace) -> error
-     *         "illegal identifier ... (identifiers cannot start with a digit)"; skip the whole bad lexeme;
-     *       - otherwise add INT_LIT or FLOAT_LIT.
-     */
-    (void)lx;
+    // lex number, INT_LIT: digit {digit},  FLOAT_LIT: digit {digit},  digit {digit}
     
     int start = lx->pos;
     int is_float = 0;
 
     while (is_digit(peek(lx, 0))){
         advance(lx);
-
+        //if we find a . then the number must be a float
         if (peek(lx, 0) == '.' && !is_float){
             is_float = 1;
             advance(lx);
@@ -262,6 +237,7 @@ static void lex_number(Lexer *lx) {
         
     }
 
+    //extract number and add token
     char *num = substr(lx->text, start, lx->pos);
 
     if (is_float){
@@ -272,11 +248,7 @@ static void lex_number(Lexer *lx) {
 }
 
 static void lex_string(Lexer *lx) {
-    /* TODO: STRING_LIT: " { any character except " and newline } "
-     *       The lexeme includes the quotes. If a newline or the end of the file comes before the
-     *       closing quote, report "unterminated string literal".
-     */
-    (void)lx;
+    // lex STRING_LIT: " { any character except " and newline } "
 
     //skip first "
     int start = lx->pos;
@@ -308,17 +280,12 @@ static void lex_string(Lexer *lx) {
 }
 
 static void lex_operator(Lexer *lx) {
-    /* TODO: Operators and punctuation: try the two-character operators first (longest match),
-     *       then the one-character ones. Anything else is an "illegal character" error
-     *       (e.g. '@', a single '&').
-     */
-    (void)lx;
-    (void)TWO_CHAR_OPS;
-    (void)ONE_CHAR_OPS;
+    //lex Operators and punctuation
 
     char *op = substr(lx->text, lx->pos, lx->pos+2);
     const char *two_char_op = lookup(TWO_CHAR_OPS, op);
 
+    //check for two char operation
     if (two_char_op != NULL){
         add_token(lx, two_char_op, op, lx->line);
         //skip the opertator characters
@@ -327,11 +294,12 @@ static void lex_operator(Lexer *lx) {
         return;
     }
 
-    //opertion wasn't a 2 character operatioon, free the pointer for the string
+    //opertion wasn't a 2 character operation, free the pointer for the string
     free(op);
     op = substr(lx->text, lx->pos, lx->pos+1);
     const char *one_char_op = lookup(ONE_CHAR_OPS, op);
 
+    //check for one char operation
     if (one_char_op != NULL){
         add_token(lx, one_char_op, op, lx->line);
     } else {

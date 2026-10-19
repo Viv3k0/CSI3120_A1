@@ -275,8 +275,6 @@ static void parse_var_decl(Parser *p) {
         if (!assignable(typ, etype)) {
             snprintf(msg, sizeof msg, "type mismatch: cannot initialize '%s' (%s) with a %s value",
                      name->lexeme, typ, etype);
-
-            printf("FOUND LEXEME: %s\n", t->lexeme);
             sem_error(p, name->line, msg);
         }
     }
@@ -299,14 +297,16 @@ static void parse_const_decl(Parser *p) {
     Token *name = expect(p, "IDENT");
     expect(p, "COLON");
     const char *assigned_type = parse_type(p);
-
-    if (!at(p, "ASSIGN_OP")){
-        printf("Whatttt\n");
-        return;
+    expect(p, "ASSIGN_OP");
+    
+    const char *found_type = parse_expr(p); //check if found type matches the declared type
+    
+    if (!assignable(found_type, assigned_type)){
+        snprintf(msg, sizeof(msg), "type mismatch: cannot initialize '%s' (%s) with a %s value",
+                name->lexeme, assigned_type, found_type);
+        sem_error(p, name->line, msg);
     }
 
-    advance(p);    
-    const char *found_type = parse_expr(p); //check if found type matches the declared type
     expect(p, "SEMICOLON");
 
     declare(p, symbol_new(name->lexeme, "const", assigned_type, name->line, p->st.current, NULL, 0));
@@ -631,7 +631,7 @@ static const char *parse_call(Parser *p, Token *name) {
     while (!at(p, "RIGHT_PAREN")){
         const char *arg_type = parse_expr(p);
 
-        if (seen_args < func->nparams && !same(func->params[seen_args], arg_type)){
+        if (seen_args < func->nparams && !assignable(func->params[seen_args], arg_type)){
             snprintf(msg, sizeof(msg), "parmeter %d of function '%s' expects type %s but got type %s", 
                seen_args+1, name->lexeme, func->params[seen_args], arg_type);
             sem_error(p, func->line, msg);
@@ -651,7 +651,7 @@ static const char *parse_call(Parser *p, Token *name) {
     }
 
     leave(p, "call");
-    return func->type;
+    return same(func->kind, "func") ? func->type : NULL;
 }
 
 /* ============================================================================
@@ -732,6 +732,7 @@ static const char *parse_rel_expr(Parser *p) {
     (void)parse_add_expr;
 
     enter(p, "rel_expr");
+    char msg[MSG];
 
     const char *a = parse_add_expr(p);
     const char *b;
@@ -743,13 +744,13 @@ static const char *parse_rel_expr(Parser *p) {
 
         if (same(op->kind, "EQ_OP") || same(op->kind, "NEQ_OP")){
             if (!same(a, b) && !(is_numeric(a) && is_numeric(b))){
-                printf("comparing different types\n");
-                exit(0);
+                snprintf(msg, sizeof(msg), "Can't use '%s' on types %s and %s", op->lexeme, a, b);
+                sem_error(p, op->line, msg);
             }
         } else {
             if (!(is_numeric(a) && is_numeric(b))){
-                printf("cant order non-numeric characters\n");
-                exit(0);
+                snprintf(msg, sizeof(msg), "Can't use '%s' on types %s and %s", op->lexeme, a, b);
+                sem_error(p, op->line, msg);
             }
         }
 
@@ -800,20 +801,22 @@ static const char *parse_factor(Parser *p) {
     // TODO("parse_factor");
 
     enter(p, "factor");
+    char msg[MSG];
     const char *t;
 
     if (at(p, "NOT_OP")){
-        advance(p);
+        Token *op = advance(p);
         t = parse_factor(p);
         if (!same(t, "bool")){
-            printf("! expects type bool\n");
-            exit(0);
+            snprintf(msg, sizeof(msg), "Can't use '!' on type %s", t);
+            sem_error(p, op->line, msg);
         }
     } else if (at(p, "SUB_OP")){
-        advance(p);
+        Token *op = advance(p);
         t = parse_factor(p);
         if (!is_numeric(t)){
-            return NULL;
+            snprintf(msg, sizeof(msg), "Can't use '-' on type %s", t);
+            sem_error(p, op->line, msg);
         }
     } else {
         t = parse_primary(p);
@@ -869,9 +872,9 @@ static const char *parse_primary(Parser *p) {
         } else {
             type = parse_call(p, t);
 
-            if (same(type, "void")){
-                printf("expression expected (not void)\n");
-                exit(0);
+            if (type != NULL && same(type, "void")){
+                snprintf(msg, sizeof(msg), "void function '%s' cannot be used in expression", t->lexeme);
+                sem_error(p, t->line, msg);
             }
         }
 
