@@ -1,4 +1,4 @@
 make               
-    ./miniscope tests/$1
+    ./miniscope $1
 
 rm -rf *.o

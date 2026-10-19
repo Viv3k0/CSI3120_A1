@@ -1,0 +1,39 @@
+=== MiniScope: test1_valid.ms ===
+[decl] line 5: func sqrt(int) : int in scope 'global' (level 0) [-]
+[decl] line 5: param n : int in scope 'sqrt' (level 1) [stack-dynamic]
+[decl] line 6: var l : int in scope 'sqrt' (level 1) [stack-dynamic]
+[bind] line 7: 'n' -> param n : int, declared at line 5 in scope 'sqrt' (level 1)
+[decl] line 7: var u : int in scope 'sqrt' (level 1) [stack-dynamic]
+[bind] line 9: 'l' -> var l : int, declared at line 6 in scope 'sqrt' (level 1)
+[bind] line 9: 'u' -> var u : int, declared at line 7 in scope 'sqrt' (level 1)
+[bind] line 10: 'l' -> var l : int, declared at line 6 in scope 'sqrt' (level 1)
+[bind] line 10: 'u' -> var u : int, declared at line 7 in scope 'sqrt' (level 1)
+[decl] line 10: var m : int in scope 'block@9' (level 2) [stack-dynamic]
+[bind] line 12: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 12: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 12: 'n' -> param n : int, declared at line 5 in scope 'sqrt' (level 1)
+[bind] line 12: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 12: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 12: 'n' -> param n : int, declared at line 5 in scope 'sqrt' (level 1)
+[bind] line 13: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 16: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 16: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 16: 'n' -> param n : int, declared at line 5 in scope 'sqrt' (level 1)
+[bind] line 17: 'l' -> var l : int, declared at line 6 in scope 'sqrt' (level 1)
+[bind] line 17: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[bind] line 19: 'u' -> var u : int, declared at line 7 in scope 'sqrt' (level 1)
+[bind] line 19: 'm' -> var m : int, declared at line 10 in scope 'block@9' (level 2)
+[decl] line 26: func isPrime(int) : bool in scope 'global' (level 0) [-]
+[decl] line 26: param n : int in scope 'isPrime' (level 1) [stack-dynamic]
+[bind] line 27: 'n' -> param n : int, declared at line 26 in scope 'isPrime' (level 1)
+[bind] line 28: 'n' -> param n : int, declared at line 26 in scope 'isPrime' (level 1)
+[decl] line 30: var i : int in scope 'isPrime' (level 1) [stack-dynamic]
+[bind] line 31: 'sqrt' -> func sqrt(int) : int, declared at line 5 in scope 'global' (level 0)
+[bind] line 31: 'n' -> param n : int, declared at line 26 in scope 'isPrime' (level 1)
+[decl] line 31: const max : int in scope 'isPrime' (level 1) [stack-dynamic]
+[bind] line 33: 'i' -> var i : int, declared at line 30 in scope 'isPrime' (level 1)
+[bind] line 33: 'max' -> const max : int, declared at line 31 in scope 'isPrime' (level 1)
+[bind] line 34: 'n' -> param n : int, declared at line 26 in scope 'isPrime' (level 1)
+[bind] line 34: 'i' -> var i : int, declared at line 30 in scope 'isPrime' (level 1)
+[bind] line 42: 'isPrime' -> func isPrime(int) : bool, declared at line 26 in scope 'global' (level 0)
+--- parse successful; 0 semantic error(s), 0 warning(s) ---

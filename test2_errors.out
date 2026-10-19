@@ -1,0 +1,74 @@
+=== MiniScope: test2_errors.ms ===
+[decl] line 3: func digitSum(int) : bool in scope 'global' (level 0) [-]
+[decl] line 3: param n : int in scope 'digitSum' (level 1) [stack-dynamic]
+[decl] line 4: var s : int in scope 'digitSum' (level 1) [stack-dynamic]
+[bind] line 5: 'n' -> param n : int, declared at line 3 in scope 'digitSum' (level 1)
+[bind] line 6: 's' -> var s : int, declared at line 4 in scope 'digitSum' (level 1)
+[bind] line 6: 's' -> var s : int, declared at line 4 in scope 'digitSum' (level 1)
+[bind] line 6: 'n' -> param n : int, declared at line 3 in scope 'digitSum' (level 1)
+[bind] line 7: 'n' -> param n : int, declared at line 3 in scope 'digitSum' (level 1)
+[bind] line 7: 'n' -> param n : int, declared at line 3 in scope 'digitSum' (level 1)
+[bind] line 9: 's' -> var s : int, declared at line 4 in scope 'digitSum' (level 1)
+[error] line 9: wrong return type to function 'digitSum', expected bool but got int
+[decl] line 12: func isHarshad(int) : bool in scope 'global' (level 0) [-]
+[decl] line 12: param n : int in scope 'isHarshad' (level 1) [stack-dynamic]
+[bind] line 13: 'n' -> param n : int, declared at line 12 in scope 'isHarshad' (level 1)
+[bind] line 13: 'digitSum' -> func digitSum(int) : bool, declared at line 3 in scope 'global' (level 0)
+[bind] line 13: 'n' -> param n : int, declared at line 12 in scope 'isHarshad' (level 1)
+[error] line 13: operator '%' cannot be applied to int and bool
+[decl] line 13: var res : int in scope 'isHarshad' (level 1) [stack-dynamic]
+[bind] line 14: 'res' -> var res : int, declared at line 13 in scope 'isHarshad' (level 1)
+[decl] line 17: func digits(int) : int in scope 'global' (level 0) [-]
+[decl] line 17: param n : int in scope 'digits' (level 1) [stack-dynamic]
+[decl] line 18: var digits : int in scope 'digits' (level 1) [stack-dynamic]
+[warn] line 18: 'digits' hides func 'digits' declared at line 17 in scope 'global' (level 0)
+[bind] line 19: 'n' -> param n : int, declared at line 17 in scope 'digits' (level 1)
+[bind] line 19: 'n' -> param n : int, declared at line 17 in scope 'digits' (level 1)
+[bind] line 21: 'n' -> param n : int, declared at line 17 in scope 'digits' (level 1)
+[bind] line 22: 'digits' -> var digits : int, declared at line 18 in scope 'digits' (level 1)
+[bind] line 22: 'digits' -> var digits : int, declared at line 18 in scope 'digits' (level 1)
+[bind] line 23: 'n' -> param n : int, declared at line 17 in scope 'digits' (level 1)
+[bind] line 23: 'n' -> param n : int, declared at line 17 in scope 'digits' (level 1)
+[bind] line 26: 'digits' -> var digits : int, declared at line 18 in scope 'digits' (level 1)
+[decl] line 29: func isPalindrome(int) : bool in scope 'global' (level 0) [-]
+[decl] line 29: param x : int in scope 'isPalindrome' (level 1) [stack-dynamic]
+[bind] line 30: 'digits' -> func digits(int) : int, declared at line 17 in scope 'global' (level 0)
+[error] line 30: 'n' is not declared (no binding visible in scope 'isPalindrome' (level 1))
+[decl] line 30: var d : int in scope 'isPalindrome' (level 1) [stack-dynamic]
+[decl] line 31: var pow : int in scope 'isPalindrome' (level 1) [stack-dynamic]
+[decl] line 33: var m : int in scope 'isPalindrome' (level 1) [stack-dynamic]
+[bind] line 35: 'm' -> var m : int, declared at line 33 in scope 'isPalindrome' (level 1)
+[bind] line 35: 'd' -> var d : int, declared at line 30 in scope 'isPalindrome' (level 1)
+[bind] line 36: 'pow' -> var pow : int, declared at line 31 in scope 'isPalindrome' (level 1)
+[bind] line 36: 'pow' -> var pow : int, declared at line 31 in scope 'isPalindrome' (level 1)
+[bind] line 37: 'm' -> var m : int, declared at line 33 in scope 'isPalindrome' (level 1)
+[bind] line 37: 'm' -> var m : int, declared at line 33 in scope 'isPalindrome' (level 1)
+[bind] line 40: 'x' -> param x : int, declared at line 29 in scope 'isPalindrome' (level 1)
+[decl] line 40: var x2 : int in scope 'isPalindrome' (level 1) [stack-dynamic]
+[decl] line 41: var i : int in scope 'isPalindrome' (level 1) [stack-dynamic]
+[bind] line 43: 'i' -> var i : int, declared at line 41 in scope 'isPalindrome' (level 1)
+[bind] line 43: 'd' -> var d : int, declared at line 30 in scope 'isPalindrome' (level 1)
+[bind] line 44: 'x2' -> var x2 : int, declared at line 40 in scope 'isPalindrome' (level 1)
+[bind] line 44: 'x' -> param x : int, declared at line 29 in scope 'isPalindrome' (level 1)
+[bind] line 44: 'pow' -> var pow : int, declared at line 31 in scope 'isPalindrome' (level 1)
+[bind] line 48: 'x2' -> var x2 : int, declared at line 40 in scope 'isPalindrome' (level 1)
+[bind] line 48: 'x2' -> var x2 : int, declared at line 40 in scope 'isPalindrome' (level 1)
+[bind] line 49: 'pow' -> var pow : int, declared at line 31 in scope 'isPalindrome' (level 1)
+[bind] line 49: 'pow' -> var pow : int, declared at line 31 in scope 'isPalindrome' (level 1)
+[bind] line 50: 'i' -> var i : int, declared at line 41 in scope 'isPalindrome' (level 1)
+[bind] line 50: 'i' -> var i : int, declared at line 41 in scope 'isPalindrome' (level 1)
+[decl] line 56: var i : int in scope 'global' (level 0) [static]
+[error] line 57: type mismatch: cannot initialize 'count' (int) with a string value
+[decl] line 57: const count : int in scope 'global' (level 0) [static]
+[bind] line 59: 'count' -> const count : int, declared at line 57 in scope 'global' (level 0)
+[bind] line 60: 'isHarshad' -> func isHarshad(int) : bool, declared at line 12 in scope 'global' (level 0)
+[bind] line 60: 'i' -> var i : int, declared at line 56 in scope 'global' (level 0)
+[bind] line 60: 'isPalindrome' -> func isPalindrome(int) : bool, declared at line 29 in scope 'global' (level 0)
+[bind] line 60: 'i' -> var i : int, declared at line 56 in scope 'global' (level 0)
+[bind] line 61: 'count' -> const count : int, declared at line 57 in scope 'global' (level 0)
+[bind] line 61: 'count' -> const count : int, declared at line 57 in scope 'global' (level 0)
+[error] line 61: attempt to assign value to const 'count'
+[bind] line 62: 'i' -> var i : int, declared at line 56 in scope 'global' (level 0)
+[decl] line 62: var specialNumber : int in scope 'block@60' (level 2) [stack-dynamic]
+[error] line 66: 'specialNumber' is not declared (no binding visible in scope 'global' (level 0))
+--- parse successful; 6 semantic error(s), 1 warning(s) ---
